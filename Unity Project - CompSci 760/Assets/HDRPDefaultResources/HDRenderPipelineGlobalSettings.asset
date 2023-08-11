@@ -18,7 +18,7 @@ MonoBehaviour:
     type: 2}
   m_RenderingPathDefaultCameraFrameSettings:
     bitDatas:
-      data1: 140666587840333
+      data1: 140666587840335
       data2: 13763000512783810584
     lodBias: 1
     lodBiasMode: 0
@@ -67,7 +67,8 @@ MonoBehaviour:
   beforeTransparentCustomPostProcesses: []
   beforePostProcessCustomPostProcesses: []
   afterPostProcessBlursCustomPostProcesses: []
-  afterPostProcessCustomPostProcesses: []
+  afterPostProcessCustomPostProcesses:
+  - NewPostProcessVolume, Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
   beforeTAACustomPostProcesses: []
   lightLayerName0: Light Layer default
   lightLayerName1: Light Layer 1
@@ -100,7 +101,7 @@ MonoBehaviour:
     serializedProfiles: []
     serializedBakeSettings: []
     serializedBakingSets: []
-    m_LightingScenario: 
+    m_LightingScenario: Default
   m_Version: 5
   m_ShaderVariantLogLevel: 0
   m_ExportShaderVariants: 1

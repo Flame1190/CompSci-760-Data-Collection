@@ -152,7 +152,7 @@ MonoBehaviour:
     m_Value: 0.15
   m_SampleCount:
     m_OverrideState: 0
-    m_Value: 8
+    m_Value: 10
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -177,6 +177,7 @@ MonoBehaviour:
   - {fileID: -7089757308646879465}
   - {fileID: -8770122170507510650}
   - {fileID: 7566445105424635921}
+  - {fileID: 2308340233163316500}
 --- !u!114 &448115243408767295
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -375,6 +376,22 @@ MonoBehaviour:
   fogType:
     m_OverrideState: 0
     m_Value: 0
+--- !u!114 &2308340233163316500
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ca77854211bb1f5419b796dcbf318c39, type: 3}
+  m_Name: NewPostProcessVolume
+  m_EditorClassIdentifier: 
+  active: 1
+  intensity:
+    m_OverrideState: 1
+    m_Value: 1
 --- !u!114 &5315503232242033309
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -588,10 +605,10 @@ MonoBehaviour:
     m_Value: 0
   m_MaximumRadiusInPixels:
     m_OverrideState: 0
-    m_Value: 32
+    m_Value: 40
   m_BilateralUpsample:
     m_OverrideState: 0
-    m_Value: 0
+    m_Value: 1
   m_DirectionCount:
     m_OverrideState: 0
     m_Value: 2
@@ -695,6 +712,7 @@ MonoBehaviour:
     m_Value:
     - {fileID: 11400000, guid: 404820c4cf36ad944862fa59c56064f0, type: 2}
     - {fileID: 11400000, guid: 2384dbf2c1c420f45a792fbc315fbfb1, type: 2}
+    - {fileID: 11400000, guid: 43bb1e2f5e8b12d4998d1b49ef27ee9f, type: 2}
 --- !u!114 &7686318427622180703
 MonoBehaviour:
   m_ObjectHideFlags: 3
