@@ -43,6 +43,7 @@ Material:
     m_Ints: []
     m_Floats:
     - _DepthMapsInterpolation: 1
+    - _Intensity: 0
     - _ShowDepthMaps: 0
     m_Colors: []
   m_BuildTextureStacks: []
