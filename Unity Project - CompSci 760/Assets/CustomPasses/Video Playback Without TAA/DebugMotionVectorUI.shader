@@ -3,6 +3,8 @@ Shader "Unlit/Test"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
+        //New
+        _DisplayArrows("Display Arrows", int) = 0 
     }
     SubShader
     {
@@ -34,6 +36,7 @@ Shader "Unlit/Test"
 
             sampler2D _MainTex;
             float4 _MainTex_ST;
+            float _DisplayArrows;
 
             v2f vert (appdata v)
             {
@@ -54,6 +57,7 @@ Shader "Unlit/Test"
                 float2 dir = (p2 - p1) / len;
                 float2 rel_p = p - center;
                 return dot(rel_p, float2(dir.y, -dir.x));
+                
             }
 
             float DistanceToSegment(float2 p, float2 p1, float2 p2)
@@ -93,7 +97,13 @@ Shader "Unlit/Test"
                 float d4 = DistanceToSegment(texcoord, start, end - float2(linewidth, 0.0));
 
                 float d = min(max(max(d1, d2), -d3), d4);
-                return d;
+               // return d;
+                if (_DisplayArrows == 1) {
+                    return d;
+                }
+                else {
+                    return 1;
+                }
             }
 
             #define PI 3.14159265359
