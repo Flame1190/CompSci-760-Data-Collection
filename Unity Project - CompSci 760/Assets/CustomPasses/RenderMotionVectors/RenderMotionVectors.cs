@@ -61,7 +61,6 @@ class RenderMotionVectors : CustomPass
     void SyncRenderTextureAspect(RenderTexture rt, Camera camera)
     {
         float aspect = rt.width / (float)rt.height;
-
         if (!Mathf.Approximately(aspect, camera.aspect))
         {
             rt.Release();

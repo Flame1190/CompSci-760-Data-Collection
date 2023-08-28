@@ -513,6 +513,11 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 1e3868e62ea58ce4dabd0e874bf9f779,
+        type: 3}
+      propertyPath: m_Materials.Array.data[0]
+      value: 
+      objectReference: {fileID: 2100000, guid: b81feaebd0168e54f894d7eaadb984b5, type: 2}
     - target: {fileID: 919132149155446097, guid: 1e3868e62ea58ce4dabd0e874bf9f779,
         type: 3}
       propertyPath: m_Name
@@ -806,7 +811,7 @@ GameObject:
   - component: {fileID: 855700297}
   - component: {fileID: 855700296}
   m_Layer: 0
-  m_Name: Camera
+  m_Name: Camera1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -856,7 +861,7 @@ MonoBehaviour:
   xrRendering: 1
   fullscreenPassthrough: 0
   allowDynamicResolution: 0
-  customRenderingSettings: 1
+  customRenderingSettings: 0
   invertFaceCulling: 0
   probeLayerMask:
     serializedVersion: 2
