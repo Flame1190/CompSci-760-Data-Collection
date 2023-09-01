@@ -4,6 +4,7 @@ import pandas as pd
 from pathlib import Path
 from itertools import repeat
 from collections import OrderedDict
+import torchvision
 
 def upsample_zero(image: torch.Tensor, *, scale_factor: int = 2) -> torch.Tensor:
     batch_size, channels, height, width = image.shape
@@ -12,6 +13,10 @@ def upsample_zero(image: torch.Tensor, *, scale_factor: int = 2) -> torch.Tensor
     zero_upsampled_image[:,:,::scale_factor,::scale_factor] = image
 
     return zero_upsampled_image
+
+def save_image(image: torch.Tensor, path: str, format: str | None = None) -> None:
+    image = image.detach().cpu()
+    torchvision.utils.save_image(image, path, format=format)
 
 def ensure_dir(dirname):
     dirname = Path(dirname)

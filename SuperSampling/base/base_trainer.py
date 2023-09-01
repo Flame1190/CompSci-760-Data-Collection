@@ -2,12 +2,13 @@ import torch
 from abc import abstractmethod
 from numpy import inf
 from logger import TensorboardWriter
-
+from base import BaseModel
 
 class BaseTrainer:
     """
     Base class for all trainers
     """
+    model: BaseModel
     def __init__(self, model, criterion, metric_ftns, optimizer, config):
         self.config = config
         self.logger = config.get_logger('trainer', config['trainer']['verbosity'])

@@ -79,12 +79,17 @@ class NSRRDataset(Dataset):
         self.resize_factor = resize_factor
         self.downsample = downsample
 
+    
+
         if transform is None:
             self.transform = tf.ToTensor()
 
         self.img_list = os.listdir(os.path.join(self.data_dir, self.img_dirname))
         self.img_list = sorted(self.img_list, key=lambda keys:[ord(i) for i in keys], reverse=False)
         
+        if num_data is None:
+            num_data = len(self.img_list)
+
         self.data_list = []
         # maintain a buffer for the last num_frames frames
         img_name_buffer = deque(maxlen=num_frames) 
@@ -117,6 +122,7 @@ class NSRRDataset(Dataset):
             img_motion = Image.open(motion_path)
             img_depth = Image.open(depth_path).convert(mode="L") # TODO: check this
 
+            # TODO: fix - this is actually width, height lmao
             height, width = img_view_truth.size
             height, width = height//self.resize_factor, width//self.resize_factor
 
@@ -140,6 +146,7 @@ class NSRRDataset(Dataset):
             # guanrenyang used full-res motion vecs (flow in their case?)
             # Paper states low res sub-pixel motion vecs are used then upsampled bilinearly
             img_motion = comp_transform(img_motion) 
+            # ugh
             img_motion = img_motion[:2, :, :] 
             # TODO: realign motion vectors for down-sampled coords
 

@@ -7,14 +7,26 @@ import torch
 from typing import List
 
 class NSRR(BaseModel):
-    def __init__(self, scale_factor: int = 2, num_frames: int = 5):
+    def __init__(self, 
+                 scale_factor: int = 2, 
+                 num_frames: int = 5, 
+                 enable_warping: bool = True, 
+                 upsample_mode: str | None = None
+                 ):
         super().__init__()
         # may not need given not converting to YCbCr
         self.feature_extraction_current = FeatureExtraction() 
         self.feature_extraction_previous = FeatureExtraction()
         
-        self.upsampler = ZeroUpsampling(scale_factor=scale_factor)
-        self.warper = BackwardsWarping(scale_factor=scale_factor)
+        if upsample_mode is not None:
+            self.upsampler = nn.Upsample(scale_factor=scale_factor, mode=upsample_mode)
+        else:
+            self.upsampler = ZeroUpsampling(scale_factor=scale_factor)
+
+        if enable_warping:
+            self.warper = BackwardsWarping(scale_factor=scale_factor)
+        else:
+            self.warper = lambda a, *_: a
 
         self.feature_reweighting = FeatureReweighting(num_frames=num_frames)
         self.reconstruction = Reconstruction(num_frames=num_frames)
@@ -188,7 +200,11 @@ class FeatureReweighting(BaseModel):
 
         scaled_weights = self.max_amplification * ((x + 1) / 2)
 
-        weighted_prev_frames = [scaled_weights[:, i, : :] * previous_frames[i] for i in range(len(previous_frames))]
+        weighted_prev_frames = [None] * len(previous_frames)
+
+        for i in range(len(previous_frames)):
+            weighted_prev_frames[i] = scaled_weights[:, i, :].unsqueeze(1) * previous_frames[i]
+
         return weighted_prev_frames
 
 class Reconstruction(BaseModel):

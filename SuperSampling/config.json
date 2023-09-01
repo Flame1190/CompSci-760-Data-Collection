@@ -1,18 +1,19 @@
 {
     "name": "NSRR",
-    "n_gpu": 1,
+    "n_gpu": 2,
 
     "arch": {
         "type": "NSRR",
         "args": {
-            "scale_factor": 2
+            "scale_factor": 8,
+            "num_frames": 5
         }
     },
     "data_loader": {
         "type": "NSRRDataLoader",
         "args":{
             "data_dir": "data/All_Scenes/train",
-            "batch_size": 1,
+            "batch_size": 8,
             "shuffle": true,
             "validation_split": 0.1,
             "num_workers": 4,
@@ -20,8 +21,8 @@
             "depth_dirname": "depth/",
             "motion_dirname": "motion/",
             "downsample": 2,
-	    "num_data": 120, 
-	    "resize_factor": 2
+	        "resize_factor": 1,
+            "num_frames": 5
         }
     },
     "optimizer": {
