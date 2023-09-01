@@ -1,11 +1,12 @@
 import unittest
-import model.model as mdl
+from model.NSRR.model import *
 import torch
 
+# Uh this won't run here dw tho :-)
 # TODO: move to a sub-folder without imports breaking
 class TestModel(unittest.TestCase):
     def test_zero_upsampling_scale_factor_2(self):
-        model = mdl.ZeroUpsampling()
+        model = ZeroUpsampling()
         _input = torch.tensor([[
         [
             [-1,-2],
@@ -33,7 +34,7 @@ class TestModel(unittest.TestCase):
         self.assertTrue(torch.allclose(model(_input), expected))
     
     def test_zero_upsampling_scale_factor_3(self):
-        model = mdl.ZeroUpsampling(scale_factor=3)
+        model = ZeroUpsampling(scale_factor=3)
         _input = torch.tensor([[
         [
             [-1,-2],
@@ -67,8 +68,8 @@ class TestModel(unittest.TestCase):
     def test_backwards_warping(self):
         # this is a bit ehh
         # will have to see how it looks for bigger images
-        model = mdl.BackwardsWarping(scale_factor=2)
-        upsampler = mdl.ZeroUpsampling(scale_factor=2)
+        model = BackwardsWarping(scale_factor=2)
+        upsampler = ZeroUpsampling(scale_factor=2)
 
         input_image_unscaled = torch.tensor([[
         [
@@ -113,7 +114,7 @@ class TestModel(unittest.TestCase):
             self.assertTrue(torch.allclose(out[:,:,i,j], expected_corners[:,:,i,j]))
         
     def test_model_pass(self):
-        model = mdl.NSRR(num_frames=2, scale_factor=2)
+        model = NSRR(num_frames=2, scale_factor=2)
         
         color_maps = [torch.rand(1,3,16,16) * 16 for _ in range(2)]
         depth_maps = [torch.rand(1,1,16,16) for _ in range(2)]
