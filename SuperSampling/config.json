@@ -5,7 +5,7 @@
     "arch": {
         "type": "NSRR",
         "args": {
-            "scale_factor": 8,
+            "scale_factor": 2,
             "num_frames": 5
         }
     },
