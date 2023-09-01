@@ -3,6 +3,7 @@ import torch.nn.functional as F
 from base import BaseModel
 from utils import upsample_zero
 import torch
+from kornia.color.ycbcr import rgb_to_ycbcr, ycbcr_to_rgb
 
 from typing import List
 
@@ -38,13 +39,18 @@ class NSRR(BaseModel):
         assert len(depth_maps) == self.num_frames
         assert len(motion_vectors) == self.num_frames - 1
         
-        current_color_depth, *prev_color_depth_maps = [torch.concat((color_map, depth_map), dim=1) for color_map, depth_map in zip(color_maps, depth_maps)]
+        # Process current frame
+        current_color_depth_ycbcr = torch.concat((rgb_to_ycbcr(color_maps[0]), depth_maps[0]), dim=1)
+
+        current_features = self.feature_extraction_current(current_color_depth_ycbcr)
+        current_features = self.upsampler(current_features)
+        
+        # Extract historical features
+        current_color_depth_rgb, *prev_color_depth_maps = [torch.concat((color_map, depth_map), dim=1) for color_map, depth_map in zip(color_maps, depth_maps)]
         assert len(prev_color_depth_maps) == self.num_frames - 1
 
-        current_features = self.feature_extraction_current(current_color_depth)
-        current_features = self.upsampler(current_features)
-
-        current_color_depth = self.upsampler(current_color_depth)
+        # For use in feature reweighting
+        current_color_depth_rgb = self.upsampler(current_color_depth_rgb)
 
         previous_features = [self.feature_extraction_previous(prev_color_depth) for prev_color_depth in prev_color_depth_maps]
         previous_features = [self.upsampler(prev_features) for prev_features in previous_features]
@@ -54,11 +60,13 @@ class NSRR(BaseModel):
             for j in range(1, i + 1):
                 previous_features[-j] = self.warper(previous_features[-j], motion_vectors[-i])
         
-        previous_features = self.feature_reweighting(current_color_depth, previous_features)
+        previous_features = self.feature_reweighting(current_color_depth_rgb, previous_features)
 
+        # De-noise upsampled and merged frames
         reconstructed_frame = self.reconstruction(current_features, previous_features)
 
-        return reconstructed_frame
+        # back to rgb
+        return ycbcr_to_rgb(reconstructed_frame)
 
 class FeatureExtraction(BaseModel):
     def __init__(self, kernel_size = 3, padding = 'same'):
