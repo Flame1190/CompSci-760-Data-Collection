@@ -50,7 +50,7 @@ public class CaptureReplay : MonoBehaviour
 
         if (_recording)
         {
-            _time += Mathf.Min(_time + Time.deltaTime, _maxTime);
+            _time = Mathf.Min(_time + Time.deltaTime, _maxTime);
 
             if (_time >= _maxTime)
             {
