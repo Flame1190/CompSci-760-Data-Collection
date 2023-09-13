@@ -16,8 +16,11 @@ public class CaptureReplay : MonoBehaviour
     [SerializeField] Transform _replayRightEye;
 
     bool _recording;
-    int _frameIndex;
-    bool _viewOculus = true;
+    bool _playLoop;
+    int _frameIndex = -1;
+    bool _viewOculus;
+    int _fpsCounter;
+    float _fpsTime;
 
     Replay _replay;
 
@@ -26,12 +29,27 @@ public class CaptureReplay : MonoBehaviour
     [SerializeField] TMP_Text _frameCountText;
     [SerializeField] TMP_Text _recordText;
     [SerializeField] TMP_Text _timeText;
+    [SerializeField] TMP_Text _fpsText;
 
     [SerializeField] string path;
 
-    private void Start()
+    [Space]
+
+    [SerializeField] bool _loopPlayOnStart;
+
+    private void Awake()
     {
         SaveAndLoad.Load();
+
+        if (_loopPlayOnStart)
+        {
+            LoadReplay();
+            TogglePlayLoop();
+        }
+        else
+        {
+            ToggleCameras();
+        }
     }
 
     private void Update()
@@ -60,6 +78,19 @@ public class CaptureReplay : MonoBehaviour
             {
                 _replay.AddFrameInfo(_time, _oculusLeftEye.position, _oculusLeftEye.rotation, _oculusRightEye.position, _oculusRightEye.rotation);
             }
+        }
+
+        if (_playLoop)
+        {
+            LoadFrameAdd(1);
+        }
+
+        _fpsCounter++;
+        if (Time.time > _fpsTime + 1)
+        {
+            _fpsText.text = "FPS: " + _fpsCounter;
+            _fpsCounter = 0;
+            _fpsTime = Time.time;
         }
     }
 
@@ -109,6 +140,11 @@ public class CaptureReplay : MonoBehaviour
         LoadFrameSet(int.Parse(_inputField.text));
     }
 
+    public void TogglePlayLoop()
+    {
+        _playLoop = !_playLoop;
+    }
+
     public void SaveReplay()
     {
         SaveAndLoad.data.AddReplay(_replay);
@@ -134,7 +170,7 @@ public class CaptureReplay : MonoBehaviour
     {
         if (_viewOculus) ToggleCameras();
 
-        _frameIndex = newIndex;
+        _frameIndex = newIndex % _replay.GetFrameCount();
 
         Replay.FrameInfo frameInfo = _replay.GetFrameInfo(_frameIndex);
 
