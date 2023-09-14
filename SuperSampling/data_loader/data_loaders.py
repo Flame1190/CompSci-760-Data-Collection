@@ -79,8 +79,6 @@ class NSRRDataset(Dataset):
         self.resize_factor = resize_factor
         self.downsample = downsample
 
-    
-
         if transform is None:
             self.transform = tf.ToTensor()
 
@@ -114,13 +112,14 @@ class NSRRDataset(Dataset):
         view_list, depth_list, motion_list, truth_list = [], [], [], []
         # elements in the lists following the order: current frame i, pre i-1, pre i-2, pre i-3, pre i-4
         for frame in data:
-            img_path = os.path.join(self.data_dir, self.img_dirname, frame)
-            depth_path = os.path.join(self.data_dir, self.depth_dirname, frame)
-            motion_path = os.path.join(self.data_dir, self.motion_dirname, frame)
+            frame, _ = frame.rsplit('.', 1)
+            img_path = os.path.join(self.data_dir, self.img_dirname, f"{frame}.png")
+            depth_path = os.path.join(self.data_dir, self.depth_dirname, f"{frame}.exr")
+            motion_path = os.path.join(self.data_dir, self.motion_dirname, f"{frame}.exr")
             
             img_view_truth = Image.open(img_path)
+            img_depth = Image.open(depth_path, formats=[""])
             img_motion = Image.open(motion_path)
-            img_depth = Image.open(depth_path).convert(mode="L") # TODO: check this
 
             # TODO: fix - this is actually width, height lmao
             height, width = img_view_truth.size
@@ -133,7 +132,7 @@ class NSRRDataset(Dataset):
             img_depth = img_depth.resize(
                 (height, width), Image.ANTIALIAS)
 
-            # not sure why the dim swap is needed
+            # dim swap is needed
             transform_downscale = tf.Resize((width//self.downsample, height//self.downsample))
             comp_transform = tf.Compose([transform_downscale, self.transform])
 
@@ -146,9 +145,6 @@ class NSRRDataset(Dataset):
             # guanrenyang used full-res motion vecs (flow in their case?)
             # Paper states low res sub-pixel motion vecs are used then upsampled bilinearly
             img_motion = comp_transform(img_motion) 
-            # ugh
-            img_motion = img_motion[:2, :, :] 
-            # TODO: realign motion vectors for down-sampled coords
 
             view_list.append(img_view)
             depth_list.append(img_depth)

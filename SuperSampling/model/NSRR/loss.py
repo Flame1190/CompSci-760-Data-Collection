@@ -8,5 +8,6 @@ def nsrr_loss(output: torch.Tensor, target: torch.Tensor, w: float=1) -> torch.T
     
     """
     # # SSIM currently seems broken?
+    # TODO: vgg-16 and window size
     loss_ssim = 1 - torch.mean(compute_ssim(output, target, 9))
     return loss_ssim
