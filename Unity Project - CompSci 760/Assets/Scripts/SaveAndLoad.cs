@@ -13,11 +13,11 @@ public class SaveAndLoad
 
     public static void Load(string filename = "logs.dat")
     {
-        if (File.Exists(Application.persistentDataPath + "/" + filename))
+        if (File.Exists(Application.dataPath + "/" + filename))
         {
             try
             {
-                using (Stream stream = File.OpenRead(Application.persistentDataPath + "/" + filename))
+                using (Stream stream = File.OpenRead(Application.dataPath + "/" + filename))
                 {
                     BinaryFormatter formatter = new BinaryFormatter();
                     data = (LogData)formatter.Deserialize(stream);
@@ -45,7 +45,7 @@ public class SaveAndLoad
 
     public static void Save()
     {
-        using (Stream stream = File.OpenWrite(Application.persistentDataPath + "/" + saveToFilename))
+        using (Stream stream = File.OpenWrite(Application.dataPath + "/" + saveToFilename))
         {
             BinaryFormatter formatter = new BinaryFormatter();
             formatter.Serialize(stream, data);
