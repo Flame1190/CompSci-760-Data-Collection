@@ -36,6 +36,7 @@ public class CaptureReplay : MonoBehaviour
     [Space]
 
     [SerializeField] bool _loopPlayOnStart;
+    [SerializeField] int _onStartIndex;
 
     private void Awake()
     {
@@ -43,6 +44,7 @@ public class CaptureReplay : MonoBehaviour
 
         if (_loopPlayOnStart)
         {
+            _inputField.text = "" + _onStartIndex;
             LoadReplay();
             TogglePlayLoop();
         }
