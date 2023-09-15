@@ -46,7 +46,7 @@ def main():
 
         new_filename = new_filename[:i]
         new_filename = f"{new_filename[::-1]}.{ext}"
-
+        
         new_files[k] = new_filename
 
     if len(set(new_files)) != len(set(files)):
@@ -60,3 +60,6 @@ def main():
     
     for old_file, new_file in zip(files, new_files):
         rename(old_file, new_file, dir_name)
+
+if __name__ == "__main__":
+    main()

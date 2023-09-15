@@ -52,12 +52,14 @@ class Trainer(BaseTrainer):
             output = self.model(low_res_list, depth_list, motion_vector_list)
 
             # Save batch result
+            toRGBFromBGR = lambda x: x[[2,1,0],:,:]
             toPILImage = torchvision.transforms.ToPILImage()
+            toImage = lambda tensor: toPILImage(toRGBFromBGR(tensor))
             output_dir = './output_pic'
             image_name = f'epoch_{epoch}_batch_{batch_idx}.png'
             
-            toPILImage(output[0]).save(f'{output_dir}/output/{image_name}', format='PNG')
-            toPILImage(high_res[0]).save(f'{output_dir}/ground_truth/{image_name}', format='PNG')
+            toImage(output[0]).save(f'{output_dir}/output/{image_name}', format='PNG')
+            toImage(high_res[0]).save(f'{output_dir}/ground_truth/{image_name}', format='PNG')
 
             # backprop
             loss = self.criterion(output, target)

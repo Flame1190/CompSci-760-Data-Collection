@@ -5,23 +5,23 @@
     "arch": {
         "type": "NSRR",
         "args": {
-            "scale_factor": 2,
+            "scale_factor": 4,
             "num_frames": 5
         }
     },
     "data_loader": {
         "type": "NSRRDataLoader",
         "args":{
-            "data_dir": "new",
-            "batch_size": 1,
+            "data_dir": "data/spaceship_clip_2_left",
+            "batch_size": 4,
             "shuffle": true,
             "validation_split": 0.1,
             "num_workers": 4,
             "img_dirname": "color/",
             "depth_dirname": "depth/",
             "motion_dirname": "motion/",
-            "downsample": 2,
-	        "resize_factor": 1,
+            "downsample": 4,
+	        "resize_factor": 2,
             "num_frames": 5
         }
     },
