@@ -1,10 +1,14 @@
 import json
 import torch
+import torch.nn.functional as F
 import pandas as pd
 from pathlib import Path
 from itertools import repeat
 from collections import OrderedDict
 import torchvision
+
+def no_op(x):
+    return x
 
 def upsample_zero(image: torch.Tensor, *, scale_factor: int = 2) -> torch.Tensor:
     batch_size, channels, height, width = image.shape
@@ -13,6 +17,27 @@ def upsample_zero(image: torch.Tensor, *, scale_factor: int = 2) -> torch.Tensor
     zero_upsampled_image[:,:,::scale_factor,::scale_factor] = image
 
     return zero_upsampled_image
+
+def warp(image: torch.Tensor, motion: torch.Tensor) -> torch.Tensor:
+    B, _, H, W = image.size()
+    # Construct a grid of relative pixel positions [-1,1] = [left, right] = [top, bottom]
+    xx = torch.linspace(-1, 1, W, device=image.device).view(1,-1).repeat(H,1)
+    yy = torch.linspace(-1, 1, H, device=image.device).view(-1,1).repeat(1,W)
+
+    xx = xx.view(1,1,H,W).repeat(B,1,1,1)
+    yy = yy.view(1,1,H,W).repeat(B,1,1,1)
+
+    grid = torch.cat((xx, yy),1)
+    # We use HDRP motion vectors which measure the forward movement of pixels
+    # measured relative to the frame, i.e. -1 means the pixel moved to the left 
+    # of the frame from the right. However, we invert these in the data loader.
+    #
+    # To get the pixel in the previous frame that we are sampling from we add 
+    # motion vector from the grid of relative pixel positions
+    vgrid = grid + motion
+
+    return F.grid_sample(image, vgrid.permute(0, 2, 3, 1).to(image.dtype), mode="bilinear", align_corners=True)
+
 
 def save_image(image: torch.Tensor, path: str, format: str | None = None) -> None:
     image = image.detach().cpu()

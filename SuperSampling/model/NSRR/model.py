@@ -1,7 +1,7 @@
 import torch.nn as nn
 import torch.nn.functional as F
 from base import BaseModel
-from utils import upsample_zero
+from utils import upsample_zero, warp, no_op
 import torch
 from kornia.color.ycbcr import rgb_to_ycbcr, ycbcr_to_rgb
 
@@ -12,20 +12,28 @@ class NSRR(BaseModel):
                  scale_factor: int = 2, 
                  num_frames: int = 5, 
                  enable_warping: bool = True, 
-                 upsample_mode: str | None = None
+                 upsample_mode: str | None = None,
+                 use_ycbcr: bool = False
+
                  ):
         super().__init__()
-        # may not need given not converting to YCbCr
+        self.color_space_enc = no_op
+        self.color_space_dec = no_op
+        if use_ycbcr:
+            self.color_space_enc = rgb_to_ycbcr
+            self.color_space_dec = ycbcr_to_rgb
+
         self.feature_extraction_current = FeatureExtraction() 
         self.feature_extraction_previous = FeatureExtraction()
         
         if upsample_mode is not None:
-            self.upsampler = nn.Upsample(scale_factor=scale_factor, mode=upsample_mode)
+            self.feature_upsampler = nn.Upsample(scale_factor=scale_factor, mode=upsample_mode)
         else:
-            self.upsampler = ZeroUpsampling(scale_factor=scale_factor)
+            self.feature_upsampler = ZeroUpsampling(scale_factor=scale_factor)
 
+        self.motion_vector_upsampler = nn.Upsample(scale_factor=scale_factor, mode='bilinear', align_corners=True)
         if enable_warping:
-            self.warper = BackwardsWarping(scale_factor=scale_factor)
+            self.warper = BackwardsWarping()
         else:
             self.warper = lambda a, *_: a
 
@@ -37,36 +45,44 @@ class NSRR(BaseModel):
     def forward(self, color_maps: List[torch.Tensor], depth_maps: List[torch.Tensor], motion_vectors: List[torch.Tensor]) -> torch.Tensor:
         assert len(color_maps) == self.num_frames
         assert len(depth_maps) == self.num_frames
-        assert len(motion_vectors) == self.num_frames - 1
+        assert len(motion_vectors) == self.num_frames
         
         # Process current frame
-        current_color_depth_ycbcr = torch.concat((rgb_to_ycbcr(color_maps[0]), depth_maps[0]), dim=1)
+        current_color_depth = torch.concat((self.color_space_enc(color_maps[0]), depth_maps[0]), dim=1)
 
-        current_features = self.feature_extraction_current(current_color_depth_ycbcr)
-        current_features = self.upsampler(current_features)
+        current_features = self.feature_extraction_current(current_color_depth)
+        current_features = self.feature_upsampler(current_features)
         
         # Extract historical features
         current_color_depth_rgb, *prev_color_depth_maps = [torch.concat((color_map, depth_map), dim=1) for color_map, depth_map in zip(color_maps, depth_maps)]
         assert len(prev_color_depth_maps) == self.num_frames - 1
 
         # For use in feature reweighting
-        current_color_depth_rgb = self.upsampler(current_color_depth_rgb)
+        current_color_depth_rgb = self.feature_upsampler(current_color_depth_rgb)
 
         previous_features = [self.feature_extraction_previous(prev_color_depth) for prev_color_depth in prev_color_depth_maps]
-        previous_features = [self.upsampler(prev_features) for prev_features in previous_features]
+        previous_features = [self.feature_upsampler(prev_features) for prev_features in previous_features]
 
-        # accumulative warping of previous features 
-        for i in range(1, self.num_frames):
-            for j in range(1, i + 1):
-                previous_features[-j] = self.warper(previous_features[-j], motion_vectors[-i])
+        # accumulate motion vectors and warp
+        for k, motion in enumerate(motion_vectors):
+            motion = self.motion_vector_upsampler(motion)
+            # first motion is 0
+            if k == 0:
+                motion_vectors[0] = motion
+                continue
+            # sample from the motion of this frame according
+            # to the accumulated motion of the future frames
+            motion_vectors[k] = self.warper(motion, motion_vectors[k-1])
+
+            # previous feature doesn't have the first frame so warp k-1
+            previous_features[k-1] = self.warper(previous_features[k-1], motion_vectors[k])
         
         previous_features = self.feature_reweighting(current_color_depth_rgb, previous_features)
-
         # De-noise upsampled and merged frames
         reconstructed_frame = self.reconstruction(current_features, previous_features)
 
         # back to rgb
-        return ycbcr_to_rgb(reconstructed_frame)
+        return self.color_space_dec(reconstructed_frame)
 
 class FeatureExtraction(BaseModel):
     def __init__(self, kernel_size = 3, padding = 'same'):
@@ -121,10 +137,8 @@ class ZeroUpsampling(BaseModel):
         return upsample_zero(frame, scale_factor=self.scale_factor)
 
 class BackwardsWarping(BaseModel):
-    def __init__(self, scale_factor: int = 2):
+    def __init__(self):
         super().__init__()
-        self.scale_factor = scale_factor
-        self.motion_vector_upsampler = nn.Upsample(scale_factor=scale_factor, mode='bilinear', align_corners=True)
 
     def forward(self, frame: torch.Tensor, motion_vector: torch.Tensor) -> torch.Tensor:
         """
@@ -148,17 +162,7 @@ class BackwardsWarping(BaseModel):
         ------
         Due to how we scale the motion vectors we require square images
         """
-        # use upsampled frame to get height and width
-        _, _, height, width = frame.shape 
-
-        # un-upsampled dims threw some issues with grid_sample so we scale then upsample
-        upsampled_motion_vector = self.motion_vector_upsampler(motion_vector * self.scale_factor) 
-        
-        # scale y? to [-1, 1] for grid_sample
-        upsampled_motion_vector[:,0,:,:] = (upsampled_motion_vector[:,0,:,:] / (width - 1)) * 2.0 - 1.0
-        upsampled_motion_vector[:,1,:,:] = (upsampled_motion_vector[:,1,:,:] / (height - 1)) * 2.0 - 1.0        
-        
-        return F.grid_sample(frame, upsampled_motion_vector.permute(0, 2, 3, 1), align_corners=True, mode='bilinear')
+        return warp(frame, motion_vector)
         
 
 class FeatureReweighting(BaseModel):

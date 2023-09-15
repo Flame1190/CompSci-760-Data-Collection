@@ -1,17 +1,14 @@
-"""
-Adapted from guanrenyangs code
-https://github.com/guanrenyang/NSRR-Reimplementation
-"""
 import os
 
-from torchvision.transforms.transforms import Resize
 from base import BaseDataLoader
 
+import torch
 import torch.nn as nn
 from torch.utils.data import Dataset
 import torchvision.transforms as tf
 
-from PIL import Image
+os.environ["OPENCV_IO_ENABLE_OPENEXR"] = "1"
+import cv2
 
 from collections import deque
 from typing import Union, Tuple, List
@@ -65,10 +62,10 @@ class NSRRDataset(Dataset):
                  depth_dirname: str,
                  motion_dirname: str,
                  downsample: int = 2,
+                 num_data:Union[int, None] = 5,
+                 resize_factor:Union[int, None] = 2,
+                 num_frames: int = 5,
                  transform: nn.Module = None,
-                 num_data:Union[int, None] = None,
-                 resize_factor:Union[int, None] = None,
-                 num_frames: int = 5
                  ):
         super().__init__()
 
@@ -76,6 +73,7 @@ class NSRRDataset(Dataset):
         self.img_dirname = img_dirname
         self.depth_dirname = depth_dirname
         self.motion_dirname = motion_dirname
+
         self.resize_factor = resize_factor
         self.downsample = downsample
 
@@ -93,6 +91,7 @@ class NSRRDataset(Dataset):
         img_name_buffer = deque(maxlen=num_frames) 
 
         for i, img_name in enumerate(self.img_list):
+
             if(i>=num_data + num_frames - 1):
                 break
                 
@@ -117,43 +116,42 @@ class NSRRDataset(Dataset):
             depth_path = os.path.join(self.data_dir, self.depth_dirname, f"{frame}.exr")
             motion_path = os.path.join(self.data_dir, self.motion_dirname, f"{frame}.exr")
             
-            img_view_truth = Image.open(img_path)
-            img_depth = Image.open(depth_path, formats=[""])
-            img_motion = Image.open(motion_path)
-
-            # TODO: fix - this is actually width, height lmao
-            height, width = img_view_truth.size
+            img_view_truth = cv2.imread(img_path)
+            img_depth = cv2.imread(depth_path, cv2.IMREAD_UNCHANGED)
+            img_motion = cv2.imread(motion_path, cv2.IMREAD_UNCHANGED)
+            
+            
+            width, height, _ = img_view_truth.shape
             height, width = height//self.resize_factor, width//self.resize_factor
 
-            img_view_truth = img_view_truth.resize(
-                (height, width), Image.ANTIALIAS)
-            img_motion = img_motion.resize(
-                (height, width), Image.ANTIALIAS)
-            img_depth = img_depth.resize(
-                (height, width), Image.ANTIALIAS)
+            img_view_truth = cv2.resize(img_view_truth, (height, width), cv2.INTER_NEAREST)
 
-            # dim swap is needed
-            transform_downscale = tf.Resize((width//self.downsample, height//self.downsample))
-            comp_transform = tf.Compose([transform_downscale, self.transform])
+            img_view_input = cv2.resize(img_view_truth, (height//self.downsample, width//self.downsample), cv2.INTER_NEAREST)
+            img_depth = cv2.resize(img_depth,  (height//self.downsample, width//self.downsample), cv2.INTER_NEAREST)
+            img_motion = cv2.resize(img_motion, (height//self.downsample, width//self.downsample), cv2.INTER_NEAREST)
 
             target_image = self.transform(img_view_truth)
-            img_view = comp_transform(img_view_truth)
+            img_view = self.transform(img_view_input)
 
-            # depth data is in a single-channel image.
-            img_depth = comp_transform(img_depth)
+            # depth data is in the 3rd channel (channels are BGR)
+            img_depth = self.transform(img_depth)[2:3, :, :]
             
-            # guanrenyang used full-res motion vecs (flow in their case?)
-            # Paper states low res sub-pixel motion vecs are used then upsampled bilinearly
-            img_motion = comp_transform(img_motion) 
+            # motion data is in the 2nd and 3rd channels (channels are BGR)
+            img_motion = self.transform(img_motion)[1:3,:,:] 
+            # swap channels to match the order of the motion vectors
+            img_motion = img_motion[[1,0],:,:]
+            img_motion[1] = -img_motion[1] # flip y axis
+            img_motion = img_motion * -1 # point backwards
 
             view_list.append(img_view)
             depth_list.append(img_depth)
             motion_list.append(img_motion)
             truth_list.append(target_image)
             
-        # Ignore the last motion vectors
+        # Ignore the last motion vector as it is not used
         # Only return the most recent frame's truth
-        return view_list, depth_list, motion_list[:-1], truth_list[0]
+        first_motion = torch.zeros_like(motion_list[0]) 
+        return view_list, depth_list, [first_motion] + motion_list[:-1], truth_list[0]
 
     def __len__(self) -> int:
         return len(self.data_list)

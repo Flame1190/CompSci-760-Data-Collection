@@ -12,12 +12,12 @@
     "data_loader": {
         "type": "NSRRDataLoader",
         "args":{
-            "data_dir": "data/All_Scenes/train",
-            "batch_size": 8,
+            "data_dir": "new",
+            "batch_size": 1,
             "shuffle": true,
             "validation_split": 0.1,
             "num_workers": 4,
-            "img_dirname": "img/",
+            "img_dirname": "color/",
             "depth_dirname": "depth/",
             "motion_dirname": "motion/",
             "downsample": 2,
