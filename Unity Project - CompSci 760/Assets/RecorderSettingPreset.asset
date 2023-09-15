@@ -1,0 +1,1134 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!181963792 &-5281928779816646218
+Preset:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: RightTest
+  m_TargetType:
+    m_NativeTypeID: 114
+    m_ManagedTypePPtr: {fileID: 11500000, guid: 6a1c0170443877e4ebae7daaf96be29a,
+      type: 3}
+    m_ManagedTypeFallback: 
+  m_Properties:
+  - target: {fileID: 0}
+    propertyPath: m_Enabled
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorHideFlags
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorClassIdentifier
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: enabled
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: take
+    value: 18
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: captureEveryNthFrame
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_Root
+    value: 5
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_Leaf
+    value: Recordings
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_ForceAssetFolder
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_AbsolutePath
+    value: D:\COMPSCI 760 Data
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_FileName
+    value: <Scene>_<Take>_<Recorder>_<Frame>
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_Version
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_OutputFormat
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVSelection
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EXRCompression
+    value: 2
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.m_Selected
+    value: cameraInputSettings
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_CustomWidth
+    value: 1824
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_CustomHeight
+    value: 1840
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.imageHeight
+    value: 2147483647
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.maxSupportedHeight
+    value: 4320
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_CustomAspectX
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_CustomAspectY
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_ImageAspect
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.source
+    value: 4
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.cameraTag
+    value: RightCam
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.flipFinalOutput
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.captureUI
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_ColorSpace
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_JpegQuality
+    value: 75
+    objectReference: {fileID: 0}
+  m_ExcludedProperties: []
+--- !u!181963792 &-2399016646124403080
+Preset:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: LeftBeauty
+  m_TargetType:
+    m_NativeTypeID: 114
+    m_ManagedTypePPtr: {fileID: 11500000, guid: 6a1c0170443877e4ebae7daaf96be29a,
+      type: 3}
+    m_ManagedTypeFallback: 
+  m_Properties:
+  - target: {fileID: 0}
+    propertyPath: m_Enabled
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorHideFlags
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorClassIdentifier
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: enabled
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: take
+    value: 18
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: captureEveryNthFrame
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_Root
+    value: 5
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_Leaf
+    value: Recordings
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_ForceAssetFolder
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_AbsolutePath
+    value: D:\COMPSCI 760 Data
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_FileName
+    value: <Scene>_<Take>_<Recorder>_<Frame>
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_Version
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_OutputFormat
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVSelection
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EXRCompression
+    value: 2
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.m_Selected
+    value: cameraInputSettings
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_CustomWidth
+    value: 1824
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_CustomHeight
+    value: 1840
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.imageHeight
+    value: 2147483647
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.maxSupportedHeight
+    value: 4320
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_CustomAspectX
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_CustomAspectY
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_ImageAspect
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.source
+    value: 4
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.cameraTag
+    value: LeftCam
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.flipFinalOutput
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.captureUI
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_ColorSpace
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_JpegQuality
+    value: 75
+    objectReference: {fileID: 0}
+  m_ExcludedProperties: []
+--- !u!181963792 &-1578398750028951077
+Preset:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: LeftMotionVector
+  m_TargetType:
+    m_NativeTypeID: 114
+    m_ManagedTypePPtr: {fileID: 11500000, guid: 6a1c0170443877e4ebae7daaf96be29a,
+      type: 3}
+    m_ManagedTypeFallback: 
+  m_Properties:
+  - target: {fileID: 0}
+    propertyPath: m_Enabled
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorHideFlags
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorClassIdentifier
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: enabled
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: take
+    value: 18
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: captureEveryNthFrame
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_Root
+    value: 5
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_Leaf
+    value: Recordings
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_ForceAssetFolder
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_AbsolutePath
+    value: D:\COMPSCI 760 Data
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_FileName
+    value: <Scene>_<Take>_<Recorder>_<Frame>
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_Version
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_OutputFormat
+    value: 2
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVSelection
+    value: 16
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EXRCompression
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.m_Selected
+    value: cameraInputSettings
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_CustomWidth
+    value: 1824
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_CustomHeight
+    value: 1840
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.imageHeight
+    value: 2147483647
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.maxSupportedHeight
+    value: 4320
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_CustomAspectX
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_CustomAspectY
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_ImageAspect
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.source
+    value: 4
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.cameraTag
+    value: LeftCam
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.flipFinalOutput
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.captureUI
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_ColorSpace
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_JpegQuality
+    value: 75
+    objectReference: {fileID: 0}
+  m_ExcludedProperties: []
+--- !u!181963792 &-434029954452308051
+Preset:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: Global Settings
+  m_TargetType:
+    m_NativeTypeID: 114
+    m_ManagedTypePPtr: {fileID: 11500000, guid: a0888db1d9f84d6da3b0d5de41f42c2d,
+      type: 3}
+    m_ManagedTypeFallback: 
+  m_Properties:
+  - target: {fileID: 0}
+    propertyPath: m_Enabled
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorHideFlags
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorClassIdentifier
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_RecordMode
+    value: 2
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_FrameRatePlayback
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_FrameRateType
+    value: 8
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_CustomFrameRateValue
+    value: 72
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_StartFrame
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EndFrame
+    value: 9
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_StartTime
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EndTime
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_CapFrameRate
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_ExitPlayMode
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_RecorderSettings.Array.size
+    value: 0
+    objectReference: {fileID: 0}
+  m_ExcludedProperties: []
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5537212fe2c4414c9a0cdd7ba0728908, type: 3}
+  m_Name: RecorderSettingPreset
+  m_EditorClassIdentifier: 
+  m_Model: {fileID: -434029954452308051}
+  m_RecorderPresets:
+  - {fileID: -2399016646124403080}
+  - {fileID: 799440490970971129}
+  - {fileID: 8931416995332435640}
+  - {fileID: 6971957072636817203}
+  - {fileID: -1578398750028951077}
+  - {fileID: 5572313346766411378}
+  - {fileID: 1378036097287013023}
+  - {fileID: -5281928779816646218}
+--- !u!181963792 &799440490970971129
+Preset:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: RightBeauty
+  m_TargetType:
+    m_NativeTypeID: 114
+    m_ManagedTypePPtr: {fileID: 11500000, guid: 6a1c0170443877e4ebae7daaf96be29a,
+      type: 3}
+    m_ManagedTypeFallback: 
+  m_Properties:
+  - target: {fileID: 0}
+    propertyPath: m_Enabled
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorHideFlags
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorClassIdentifier
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: enabled
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: take
+    value: 18
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: captureEveryNthFrame
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_Root
+    value: 5
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_Leaf
+    value: Recordings
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_ForceAssetFolder
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_AbsolutePath
+    value: D:\COMPSCI 760 Data
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_FileName
+    value: <Scene>_<Take>_<Recorder>_<Frame>
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_Version
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_OutputFormat
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVSelection
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EXRCompression
+    value: 2
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.m_Selected
+    value: cameraInputSettings
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_CustomWidth
+    value: 1824
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_CustomHeight
+    value: 1840
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.imageHeight
+    value: 2147483647
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.maxSupportedHeight
+    value: 4320
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_CustomAspectX
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_CustomAspectY
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_ImageAspect
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.source
+    value: 4
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.cameraTag
+    value: RightCam
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.flipFinalOutput
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.captureUI
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_ColorSpace
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_JpegQuality
+    value: 75
+    objectReference: {fileID: 0}
+  m_ExcludedProperties: []
+--- !u!181963792 &1378036097287013023
+Preset:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: LeftTest
+  m_TargetType:
+    m_NativeTypeID: 114
+    m_ManagedTypePPtr: {fileID: 11500000, guid: 6a1c0170443877e4ebae7daaf96be29a,
+      type: 3}
+    m_ManagedTypeFallback: 
+  m_Properties:
+  - target: {fileID: 0}
+    propertyPath: m_Enabled
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorHideFlags
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorClassIdentifier
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: enabled
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: take
+    value: 18
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: captureEveryNthFrame
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_Root
+    value: 5
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_Leaf
+    value: Recordings
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_ForceAssetFolder
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_AbsolutePath
+    value: D:\COMPSCI 760 Data
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_FileName
+    value: <Scene>_<Take>_<Recorder>_<Frame>
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_Version
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_OutputFormat
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVSelection
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EXRCompression
+    value: 2
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.m_Selected
+    value: cameraInputSettings
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_CustomWidth
+    value: 1824
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_CustomHeight
+    value: 1840
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.imageHeight
+    value: 2147483647
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.maxSupportedHeight
+    value: 4320
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_CustomAspectX
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_CustomAspectY
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_ImageAspect
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.source
+    value: 4
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.cameraTag
+    value: LeftCam
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.flipFinalOutput
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.captureUI
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_ColorSpace
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_JpegQuality
+    value: 75
+    objectReference: {fileID: 0}
+  m_ExcludedProperties: []
+--- !u!181963792 &5572313346766411378
+Preset:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: RightMotionVector
+  m_TargetType:
+    m_NativeTypeID: 114
+    m_ManagedTypePPtr: {fileID: 11500000, guid: 6a1c0170443877e4ebae7daaf96be29a,
+      type: 3}
+    m_ManagedTypeFallback: 
+  m_Properties:
+  - target: {fileID: 0}
+    propertyPath: m_Enabled
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorHideFlags
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorClassIdentifier
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: enabled
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: take
+    value: 18
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: captureEveryNthFrame
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_Root
+    value: 5
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_Leaf
+    value: Recordings
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_ForceAssetFolder
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_AbsolutePath
+    value: D:\COMPSCI 760 Data
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_FileName
+    value: <Scene>_<Take>_<Recorder>_<Frame>
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_Version
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_OutputFormat
+    value: 2
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVSelection
+    value: 16
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EXRCompression
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.m_Selected
+    value: cameraInputSettings
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_CustomWidth
+    value: 1824
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_CustomHeight
+    value: 1840
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.imageHeight
+    value: 2147483647
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.maxSupportedHeight
+    value: 4320
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_CustomAspectX
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_CustomAspectY
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_ImageAspect
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.source
+    value: 4
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.cameraTag
+    value: RightCam
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.flipFinalOutput
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.captureUI
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_ColorSpace
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_JpegQuality
+    value: 75
+    objectReference: {fileID: 0}
+  m_ExcludedProperties: []
+--- !u!181963792 &6971957072636817203
+Preset:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: RightDepth
+  m_TargetType:
+    m_NativeTypeID: 114
+    m_ManagedTypePPtr: {fileID: 11500000, guid: 6a1c0170443877e4ebae7daaf96be29a,
+      type: 3}
+    m_ManagedTypeFallback: 
+  m_Properties:
+  - target: {fileID: 0}
+    propertyPath: m_Enabled
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorHideFlags
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorClassIdentifier
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: enabled
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: take
+    value: 18
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: captureEveryNthFrame
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_Root
+    value: 5
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_Leaf
+    value: Recordings
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_ForceAssetFolder
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_AbsolutePath
+    value: D:\COMPSCI 760 Data
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_FileName
+    value: <Scene>_<Take>_<Recorder>_<Frame>
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_Version
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_OutputFormat
+    value: 2
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVSelection
+    value: 17
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EXRCompression
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.m_Selected
+    value: cameraInputSettings
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_CustomWidth
+    value: 1824
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_CustomHeight
+    value: 1840
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.imageHeight
+    value: 2147483647
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.maxSupportedHeight
+    value: 4320
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_CustomAspectX
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_CustomAspectY
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_ImageAspect
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.source
+    value: 4
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.cameraTag
+    value: RightCam
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.flipFinalOutput
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.captureUI
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_ColorSpace
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_JpegQuality
+    value: 75
+    objectReference: {fileID: 0}
+  m_ExcludedProperties: []
+--- !u!181963792 &8931416995332435640
+Preset:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: LeftDepth
+  m_TargetType:
+    m_NativeTypeID: 114
+    m_ManagedTypePPtr: {fileID: 11500000, guid: 6a1c0170443877e4ebae7daaf96be29a,
+      type: 3}
+    m_ManagedTypeFallback: 
+  m_Properties:
+  - target: {fileID: 0}
+    propertyPath: m_Enabled
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorHideFlags
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EditorClassIdentifier
+    value: 
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: enabled
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: take
+    value: 18
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: captureEveryNthFrame
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_Root
+    value: 5
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_Leaf
+    value: Recordings
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_ForceAssetFolder
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_Path.m_AbsolutePath
+    value: D:\COMPSCI 760 Data
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: fileNameGenerator.m_FileName
+    value: <Scene>_<Take>_<Recorder>_<Frame>
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_Version
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_OutputFormat
+    value: 2
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVSelection
+    value: 17
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_EXRCompression
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.m_Selected
+    value: cameraInputSettings
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_CustomWidth
+    value: 1824
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_CustomHeight
+    value: 1840
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.imageHeight
+    value: 2147483647
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.maxSupportedHeight
+    value: 4320
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_CustomAspectX
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_CustomAspectY
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.m_OutputResolution.m_AspectRatio.m_ImageAspect
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.source
+    value: 4
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.cameraTag
+    value: LeftCam
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.flipFinalOutput
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_AOVImageInputSelector.cameraInputSettings.captureUI
+    value: 0
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_ColorSpace
+    value: 1
+    objectReference: {fileID: 0}
+  - target: {fileID: 0}
+    propertyPath: m_JpegQuality
+    value: 75
+    objectReference: {fileID: 0}
+  m_ExcludedProperties: []
