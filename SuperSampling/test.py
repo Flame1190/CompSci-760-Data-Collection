@@ -31,7 +31,8 @@ def main(config):
         validation_split=0.0,
         num_workers=4,
         downsample=config['data_loader']['args']['downsample'],
-        resize_factor=config['data_loader']['args']['resize_factor'],
+        # resize_factor=config['data_loader']['args']['resize_factor'],
+        resize_dimensions=config['data_loader']['args']['resize_dimensions'],
         num_frames=config['data_loader']['args']['num_frames']
     )
 

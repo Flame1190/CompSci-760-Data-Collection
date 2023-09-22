@@ -179,7 +179,7 @@ class FeatureReweighting(BaseModel):
             nn.Conv2d(32, 32, kernel_size=kernel_size, padding=padding),
             nn.ReLU(),
             nn.Conv2d(32, num_frames - 1, kernel_size=kernel_size, padding=padding),
-            nn.Tanh()
+            nn.Tanh() # TODO: change to hardtanh [0,10] or [0,1] then scale
         )
 
 
@@ -226,7 +226,8 @@ class Reconstruction(BaseModel):
     def __init__(self, kernel_size = 3, padding = 'same', num_frames: int = 5):
         super().__init__()
         self.down = nn.MaxPool2d(kernel_size=2)
-        self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
+        self.up = nn.Upsample(scale_factor=2, mode='nearest')
+        # self.up = nn.Upsample(scale_factor=2, mode='bilinear', align_corners=True)
         
         self.enc1 = nn.Sequential(
             nn.Conv2d(12 * num_frames, 64, kernel_size=kernel_size, padding=padding),

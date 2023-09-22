@@ -33,6 +33,8 @@ def main(config):
     device, device_ids = prepare_device(config['n_gpu'])
     model = model.to(device)
     if len(device_ids) > 1:
+        # Todo: switch to DistributedDataParallel
+        # will need some work around
         model = torch.nn.DataParallel(model, device_ids=device_ids)
 
     # initialize parameters
@@ -48,13 +50,17 @@ def main(config):
     trainable_params = filter(lambda p: p.requires_grad, model.parameters())
     optimizer = config.init_obj('optimizer', torch.optim, trainable_params)
     lr_scheduler = config.init_obj('lr_scheduler', torch.optim.lr_scheduler, optimizer)
+    batch_split_size = config["data_loader"]["args"]["batch_size"]
+    if "batch_split_size" in config["trainer"]:
+        batch_split_size = config["trainer"]["batch_split_size"]
 
     trainer = Trainer(model, criterion, metrics, optimizer,
                       config=config,
                       device=device,
                       data_loader=data_loader,
                       valid_data_loader=valid_data_loader,
-                      lr_scheduler=lr_scheduler)
+                      lr_scheduler=lr_scheduler,
+                      batch_split_size=batch_split_size)
 
     trainer.train()
 

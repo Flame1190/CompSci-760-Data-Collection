@@ -6,22 +6,23 @@
         "type": "NSRR",
         "args": {
             "scale_factor": 4,
-            "num_frames": 5
+            "num_frames": 5,
+            "use_ycbcr": true
         }
     },
     "data_loader": {
         "type": "NSRRDataLoader",
         "args":{
             "data_dir": "data/spaceship_clip_2_left",
-            "batch_size": 4,
+            "batch_size": 8,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 4,
-            "img_dirname": "color/",
+            "num_workers": 2,
+            "img_dirname": "no_post_color/",
             "depth_dirname": "depth/",
             "motion_dirname": "motion/",
             "downsample": 4,
-	        "resize_factor": 2,
+	        "resize_dimensions": [1200, 1200],
             "num_frames": 5
         }
     },
@@ -52,7 +53,7 @@
         
         "monitor": "min val_loss",
         "early_stop": 10,
-
+        "batch_split_size": 2,
         "tensorboard": false
     }
 }

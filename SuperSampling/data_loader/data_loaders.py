@@ -33,8 +33,10 @@ class NSRRDataLoader(BaseDataLoader):
                  downsample: Union[Tuple[int, int], List[int], int] = (2, 2),
                  num_data: Union[int,None] = None,
                  resize_factor : Union[int, None] = None,
+                 resize_dimensions : None | Tuple[int, int] = None,
                  num_frames: int = 5,
                  ):
+        assert (resize_factor is not None) != (resize_dimensions is not None)
         dataset = NSRRDataset(data_dir,
                               img_dirname=img_dirname,
                               depth_dirname=depth_dirname,
@@ -42,6 +44,7 @@ class NSRRDataLoader(BaseDataLoader):
                               downsample=downsample,
                               num_data=num_data,
                               resize_factor = resize_factor,
+                              resize_dimensions = resize_dimensions,
                               num_frames = num_frames,
                               )
         super().__init__(dataset=dataset,
@@ -63,10 +66,12 @@ class NSRRDataset(Dataset):
                  motion_dirname: str,
                  downsample: int = 2,
                  num_data:Union[int, None] = 5,
-                 resize_factor:Union[int, None] = 2,
+                 resize_factor:Union[int, None] = None,
+                 resize_dimensions: None | Tuple[int, int] = None,
                  num_frames: int = 5,
                  transform: nn.Module = None,
                  ):
+        assert (resize_factor is not None) != (resize_dimensions is not None)
         super().__init__()
 
         self.data_dir = data_dir
@@ -75,6 +80,8 @@ class NSRRDataset(Dataset):
         self.motion_dirname = motion_dirname
 
         self.resize_factor = resize_factor
+        self.resize_dimensions = resize_dimensions
+
         self.downsample = downsample
 
         if transform is None:
@@ -122,7 +129,11 @@ class NSRRDataset(Dataset):
             
             
             width, height, _ = img_view_truth.shape
-            height, width = height//self.resize_factor, width//self.resize_factor
+            if self.resize_factor:
+                height, width = height//self.resize_factor, width//self.resize_factor
+            else:
+                height, width = self.resize_dimensions # TODO: reorder, this should be width, height
+                
 
             img_view_truth = cv2.resize(img_view_truth, (height, width), cv2.INTER_NEAREST)
 
@@ -130,8 +141,8 @@ class NSRRDataset(Dataset):
             img_depth = cv2.resize(img_depth,  (height//self.downsample, width//self.downsample), cv2.INTER_NEAREST)
             img_motion = cv2.resize(img_motion, (height//self.downsample, width//self.downsample), cv2.INTER_NEAREST)
 
-            target_image = self.transform(img_view_truth)
-            img_view = self.transform(img_view_input)
+            target_image = self.transform(img_view_truth)[[2,1,0],:,:]
+            img_view = self.transform(img_view_input)[[2,1,0],:,:]
 
             # depth data is in the 3rd channel (channels are BGR)
             img_depth = self.transform(img_depth)[2:3, :, :]
