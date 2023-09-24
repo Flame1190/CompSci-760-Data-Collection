@@ -93,15 +93,17 @@ class SupersamplingDataset(Dataset):
         # maintain a buffer for the last num_frames frames
         img_name_buffer = deque(maxlen=num_frames) 
 
-        for i, clip_dir in enumerate(self.clips.keys()):
+        count_data = 0
+        for clip_dir in self.clips.keys():
             clip = self.clips[clip_dir]
             for img_name in clip:
-                if(i>=num_data + num_frames - 1):
+                if(count_data >= num_data + num_frames - 1):
                     break
                     
                 img_name_buffer.appendleft(img_name)
                 if len(img_name_buffer) == num_frames:
                     self.data_list.append((clip_dir, list(img_name_buffer)))
+                    count_data += 1
 
             # handle scene change
             img_name_buffer.clear()
