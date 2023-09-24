@@ -38,6 +38,30 @@ def warp(image: torch.Tensor, motion: torch.Tensor) -> torch.Tensor:
 
     return F.grid_sample(image, vgrid.permute(0, 2, 3, 1).to(image.dtype), mode="bilinear", align_corners=True)
 
+def retrieve_elements_from_indices(tensor: torch.Tensor, indices: torch.Tensor) -> torch.Tensor:
+    _, iC, _, _ = indices.shape
+    assert iC == 1
+    B, C, H, W = tensor.shape
+
+    indices = indices.flatten(start_dim=1).view(B, 1, -1)
+    tensor = tensor.flatten(start_dim=2)
+    
+    # duplicate for each channel for gather to work
+    indices = indices.repeat(1, C, 1) 
+
+    # if not duplicating indices for each channel
+    # we would have to loop over each channel and gather
+    tensor = tensor.gather(dim=2, index=indices).view(B, C, H, W)
+    return tensor
+
+def flatten(items):
+    result = []
+    for item in items:
+        if isinstance(item, list):
+            result.extend(flatten(item))
+        else:
+            result.append(item)
+    return result
 
 def save_image(image: torch.Tensor, path: str, format: str | None = None) -> None:
     image = image.detach().cpu()
