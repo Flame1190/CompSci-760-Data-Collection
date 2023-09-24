@@ -69,7 +69,7 @@
         "monitor": "min val_loss",
         "early_stop": 10,
         "args": {
-            "batch_split_size": 2,
+            "batch_split_size": 1,
             "method": "nsrr"
             
         },

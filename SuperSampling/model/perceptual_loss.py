@@ -16,7 +16,7 @@ class PerceptualLoss(nn.Module):
 
         self.loss_layers = { layer: 0 for layer, _ in loss_layers }
         for layer, _ in loss_layers: 
-            self.loss_layers[layer] += 1
+            self.loss_layers[layer] += 1 / len(loss_layers)
 
         self.eval()
         for param in self.parameters():

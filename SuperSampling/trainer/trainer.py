@@ -12,13 +12,14 @@ class Trainer(BaseTrainer):
     """
     def __init__(self, model, metric_ftns, optimizer, config, device,
                  data_loader, valid_data_loader=None, lr_scheduler=None, len_epoch=None, 
-                 batch_split_size=None, method=None, use_prev_high_res=False):
+                 batch_split_size=None, method=None, use_prev_high_res=False, device_ids=None):
         assert method is not None
         assert f"init_{method}" in Trainer.__dict__
         assert f"train_{method}" in Trainer.__dict__
 
         self.config = config
         self.device = device
+        self.device_ids = device_ids
         self.data_loader = data_loader
         if len_epoch is None:
             # epoch-based training
@@ -53,7 +54,7 @@ class Trainer(BaseTrainer):
         :return: A log that contains average loss and metric in this epoch.
         """
         toImage = torchvision.transforms.ToPILImage()
-        output_dir = './results'
+        output_dir = './output_pic'
 
         # Modifications copied from https://github.com/guanrenyang/NSRR-Reimplementation : trainer/trainer.py
         self.model.train()
@@ -128,6 +129,8 @@ class Trainer(BaseTrainer):
         Initialize trainer for Neural Supersampling for Real-time Rendering
         """
         self.criterion = NSRRLoss(0.1).to(self.device)
+        # if len(self.device_ids) > 1:
+        #     self.criterion = torch.nn.DataParallel(self.criterion, device_ids=self.device_ids)
 
     def train_nsrr(self, low_res_list, depth_list, motion_vector_list, target_list, weight=1, accumulate_gradients=True):
         """
@@ -143,6 +146,11 @@ class Trainer(BaseTrainer):
         output = self.model(low_res_list, depth_list, motion_vector_list)
 
         loss = self.criterion(output, target) * weight
+        # Pytorch can't gather loss
+        # if hasattr(loss, "shape"):
+        #     self.logger.debug("Averaging")
+        #     loss = torch.mean(loss)
+
         if accumulate_gradients:
             loss.backward()
 
@@ -153,12 +161,13 @@ class Trainer(BaseTrainer):
         return output, loss.item(), metrics
     
     def init_mnss(self):
-        
         self.criterion = MNSSLoss(
             self.config["globals"]["scale_factor"],
             k=5,
             w=0.1
         ).to(self.device)
+        # if len(self.device_ids) > 1:
+        #     self.criterion = torch.nn.DataParallel(self.criterion, device_ids=self.device_ids)
 
     def train_mnss(self, low_res_list, depth_list, motion_vector_list, target_list, weight=1, accumulate_gradients=True):
         n = len(low_res_list)

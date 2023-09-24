@@ -14,7 +14,7 @@
     "data_loader": {
         "type": "SupersamplingDataLoader",
         "args":{
-            "data_dirs": "small_data",
+            "data_dirs": "data/spaceship_clip_2_left",
             "batch_size": 8,
             "shuffle": true,
             
@@ -30,7 +30,7 @@
     "valid_data_loader": {
         "type": "SupersamplingDataLoader",
         "args":{
-            "data_dirs": "small_data",
+            "data_dirs": "data/spaceship_clip_2_left",
             "batch_size": 8,
             "shuffle": true,
             
@@ -39,6 +39,7 @@
             "depth_dirname": "depth/",
             "motion_dirname": "motion/",
             
+            "num_data": 50,
 	        "output_dimensions": [1200, 1200],
             "num_frames": 5
         }
@@ -69,7 +70,7 @@
         "monitor": "min val_loss",
         "early_stop": 10,
         "args": {
-            "batch_split_size": 2,
+            "batch_split_size": 1,
             "method": "nsrr"
             
         },
