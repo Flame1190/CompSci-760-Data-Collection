@@ -77,13 +77,13 @@ class SupersamplingDataset(Dataset):
         self.scale_factor = scale_factor
         self.output_dimensions = output_dimensions
 
-        self.transform = tf.transforms.Compose([
-            tf.Lambda(lambda x: x[[2,1,0],:,:]), # BGR to RGB (for cv2)
-            tf.ToTensor(),
-        ])
+        # self.transform = tf.transforms.Compose([
+        #     tf.Lambda(lambda x: x[[2,1,0],:,:]), # BGR to RGB (for cv2)
+        #     tf.ToTensor(),
+        # ])
 
         self.clips = {
-            data_dir: sorted(os.list(os.path.join(data_dir, self.color_dirname)), reverse=False) for data_dir in self.data_dirs
+            data_dir: sorted(os.listdir(os.path.join(data_dir, self.color_dirname)), reverse=False) for data_dir in self.data_dirs
         }
 
         if num_data is None:
@@ -93,29 +93,34 @@ class SupersamplingDataset(Dataset):
         # maintain a buffer for the last num_frames frames
         img_name_buffer = deque(maxlen=num_frames) 
 
-        for i, clip in enumerate(self.clips.values()):
+        for i, clip_dir in enumerate(self.clips.keys()):
+            clip = self.clips[clip_dir]
             for img_name in clip:
                 if(i>=num_data + num_frames - 1):
                     break
                     
                 img_name_buffer.appendleft(img_name)
                 if len(img_name_buffer) == num_frames:
-                    self.data_list.append(list(img_name_buffer))
+                    self.data_list.append((clip_dir, list(img_name_buffer)))
 
             # handle scene change
             img_name_buffer.clear()
 
     
     def __getitem__(self, index):
-        data = self.data_list[index]
+        clip_dir, data = self.data_list[index]
+        transform = tf.transforms.Compose([
+            tf.ToTensor(),
+            tf.Lambda(lambda x: x[[2,1,0]]), # BGR to RGB (for cv2)
+        ])
 
         view_list, depth_list, motion_list, truth_list = [], [], [], []
         # elements in the lists following the order: current frame i, pre i-1, pre i-2, pre i-3, pre i-4
         for frame in data:
             frame, _ = frame.rsplit('.', 1)
-            img_path = os.path.join(self.data_dir, self.color_dirname, f"{frame}.png")
-            depth_path = os.path.join(self.data_dir, self.depth_dirname, f"{frame}.exr")
-            motion_path = os.path.join(self.data_dir, self.motion_dirname, f"{frame}.exr")
+            img_path = os.path.join(clip_dir, self.color_dirname, f"{frame}.png")
+            depth_path = os.path.join(clip_dir, self.depth_dirname, f"{frame}.exr")
+            motion_path = os.path.join(clip_dir, self.motion_dirname, f"{frame}.exr")
             
             img_view_truth = cv2.imread(img_path)
             img_depth = cv2.imread(depth_path, cv2.IMREAD_UNCHANGED)
@@ -123,8 +128,8 @@ class SupersamplingDataset(Dataset):
             
             
             width, height, _ = img_view_truth.shape
-            if self.resize_dimensions is not None:
-                height, width = self.resize_dimensions # TODO: reorder, this should be width, height
+            if self.output_dimensions is not None:
+                height, width = self.output_dimensions # TODO: reorder, this should be width, height
                 
             # TODO: check interpolation method
             img_view_truth = cv2.resize(img_view_truth, (height, width), cv2.INTER_NEAREST)
@@ -134,10 +139,10 @@ class SupersamplingDataset(Dataset):
             img_depth = cv2.resize(img_depth,  (low_res_height, low_res_width), cv2.INTER_NEAREST)
             img_motion = cv2.resize(img_motion, (low_res_height, low_res_width), cv2.INTER_NEAREST)
 
-            target_image = self.transform(img_view_truth)
-            img_view = self.transform(img_view_input)
-            img_depth = self.transform(img_depth)[0:1, :, :]
-            img_motion = self.transform(img_motion)[0:2,:,:] 
+            target_image = transform(img_view_truth)
+            img_view = transform(img_view_input)
+            img_depth = transform(img_depth)[0:1, :, :]
+            img_motion = transform(img_motion)[0:2,:,:] 
             img_motion[1] = -img_motion[1] # flip y axis 
             img_motion = img_motion * -1 # point backwards
 

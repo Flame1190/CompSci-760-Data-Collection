@@ -1,14 +1,13 @@
 {
-    "name": "NSRR",
+    "name": "MNSS",
     "n_gpu": 2,
     "globals": {
         "scale_factor": 4
     },
     "arch": {
-        "type": "NSRR",
+        "type": "MNSS",
         "args": {
-            "num_frames": 5,
-            "use_ycbcr": true
+            
         }
     },
     "data_loader": {
@@ -24,7 +23,7 @@
             "motion_dirname": "motion/",
             
 	        "output_dimensions": [1200, 1200],
-            "num_frames": 5
+            "num_frames": 2
         }
     },
     "valid_data_loader": {
@@ -40,13 +39,13 @@
             "motion_dirname": "motion/",
             
 	        "output_dimensions": [1200, 1200],
-            "num_frames": 5
+            "num_frames": 2
         }
     },
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 0.0001, 
+            "lr": 0.001, 
             "weight_decay": 0.00001,
             "amsgrad": true
         }
@@ -70,8 +69,8 @@
         "early_stop": 10,
         "args": {
             "batch_split_size": 2,
-            "method": "nsrr"
-            
+            "method": "mnss",
+            "use_prev_high_res": true
         },
         "tensorboard": false
     }

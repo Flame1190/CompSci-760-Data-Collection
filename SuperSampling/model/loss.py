@@ -1,1 +1,2 @@
-from .NSRR import nsrr_loss
+from .NSRR import NSRRLoss
+from .MNSS import MNSSLoss

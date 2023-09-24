@@ -14,7 +14,6 @@ class NSRR(BaseModel):
                  enable_warping: bool = True, 
                  upsample_mode: str | None = None,
                  use_ycbcr: bool = False
-
                  ):
         super().__init__()
         self.color_space_enc = no_op
