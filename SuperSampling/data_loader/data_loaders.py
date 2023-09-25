@@ -1,5 +1,5 @@
 import os
-
+import random
 from base import BaseDataLoader
 
 import torch
@@ -36,6 +36,7 @@ class SupersamplingDataLoader(BaseDataLoader):
                  num_workers: int = 1,
                  num_data: Union[int, None] = None,
                  output_dimensions: Union[int, None] = None,
+                 drop_frames: int | None = None
                  ):
         self.dataset = SupersamplingDataset(data_dirs=data_dirs,
                               color_dirname=color_dirname,
@@ -45,6 +46,8 @@ class SupersamplingDataLoader(BaseDataLoader):
                               num_data=num_data,
                               output_dimensions=output_dimensions,
                               num_frames=num_frames,
+                              shuffle=shuffle,
+                              drop_frames=drop_frames
                               )
         super().__init__(dataset=self.dataset,
                          batch_size=batch_size,
@@ -64,8 +67,10 @@ class SupersamplingDataset(Dataset):
                  motion_dirname: str,
                  scale_factor: int,
                  num_frames: int,
+                 shuffle: bool,
                  output_dimensions: None | Tuple[int, int] = None,
                  num_data: Union[int, None] = None,
+                 drop_frames: int | None = None
                  ):
         super().__init__()
 
@@ -77,10 +82,7 @@ class SupersamplingDataset(Dataset):
         self.scale_factor = scale_factor
         self.output_dimensions = output_dimensions
 
-        # self.transform = tf.transforms.Compose([
-        #     tf.Lambda(lambda x: x[[2,1,0],:,:]), # BGR to RGB (for cv2)
-        #     tf.ToTensor(),
-        # ])
+        self.shuffle = shuffle
 
         self.clips = {
             data_dir: sorted(os.listdir(os.path.join(data_dir, self.color_dirname)), reverse=False) for data_dir in self.data_dirs
@@ -89,24 +91,32 @@ class SupersamplingDataset(Dataset):
         if num_data is None:
             num_data = sum([len(clip) for clip in self.clips.values()])
 
+        if drop_frames is not None:
+            assert drop_frames > 0
+
         self.data_list = []
         # maintain a buffer for the last num_frames frames
         img_name_buffer = deque(maxlen=num_frames) 
 
-        count_data = 0
         for clip_dir in self.clips.keys():
             clip = self.clips[clip_dir]
             for img_name in clip:
-                if(count_data >= num_data + num_frames - 1):
-                    break
-                    
+                
                 img_name_buffer.appendleft(img_name)
                 if len(img_name_buffer) == num_frames:
                     self.data_list.append((clip_dir, list(img_name_buffer)))
-                    count_data += 1
+
+                    if drop_frames is not None:
+                        for _ in range(drop_frames):
+                            img_name_buffer.pop()
 
             # handle scene change
             img_name_buffer.clear()
+
+        if self.shuffle:
+            self.data_list = random.sample(self.data_list, min(len(self.data_list), num_data))
+        else:
+            self.data_list = self.data_list[:num_data]
 
     
     def __getitem__(self, index):

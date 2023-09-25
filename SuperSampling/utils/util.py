@@ -94,13 +94,17 @@ def inf_loop(data_loader):
         yield from loader
 
 def get_least_utilized_gpu():
+    # BROKEN
     # Special thanks https://discuss.pytorch.org/t/it-there-anyway-to-let-program-select-free-gpu-automatically/17560/2
     gpu_stats = subprocess.check_output(["nvidia-smi", "--format=csv", "--query-gpu=memory.used,memory.free"])
-    gpu_df = pd.read_csv(StringIO(gpu_stats),
+    # tmp = str(gpu_stats, encoding="utf-8").split("\n")
+    # print(tmp)
+    gpu_df = pd.read_csv(StringIO(str(gpu_stats, encoding="utf-8")),
                          names=['memory.used', 'memory.free'],
                          skiprows=1)
     print('GPU usage:\n{}'.format(gpu_df))
-    gpu_df['memory.free'] = gpu_df['memory.free'].map(lambda x: x.rstrip(' [MiB]'))
+    gpu_df['memory.free'] = gpu_df['memory.free'].map(lambda x: x.rstrip(' [MiB]').rstrip(' MiB'))
+    gpu_df['memory.free'] = gpu_df['memory.free'].map(float)
     idx = gpu_df['memory.free'].idxmax()
     print('Returning GPU{} with {} free MiB'.format(idx, gpu_df.iloc[idx]['memory.free']))
     return idx
@@ -121,13 +125,13 @@ def prepare_device(n_gpu_use):
         
     device = None
     list_ids = None
-    if n_gpu_use == 1 and n_gpu > 1:
-        free_gpu_id = get_least_utilized_gpu()
-        torch.cuda.set_device(free_gpu_id)
-        list_ids = [free_gpu_id]
-    else: 
-        device = torch.device('cuda:0' if n_gpu_use > 0 else 'cpu')
-        list_ids = list(range(n_gpu_use))
+    # if n_gpu_use == 1 and n_gpu > 1:
+    #     free_gpu_id = get_least_utilized_gpu()
+    #     torch.cuda.set_device(free_gpu_id)
+    #     list_ids = [free_gpu_id]
+    # else: 
+    device = torch.device('cuda:0' if n_gpu_use > 0 else 'cpu')
+    list_ids = list(range(n_gpu_use))
     return device, list_ids
 
 class MetricTracker:

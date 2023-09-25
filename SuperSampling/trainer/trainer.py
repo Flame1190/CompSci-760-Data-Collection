@@ -244,7 +244,7 @@ class Trainer(BaseTrainer):
             avg_loss += loss.item()  
 
             for i, met in enumerate(self.metric_ftns):
-                avg_metrics[i] = met(output, target) * weight / (n - 1) # average over clip
+                avg_metrics[i] += met(output, target) * weight / (n - 1) # average over clip
 
         return output, avg_loss, avg_metrics
 

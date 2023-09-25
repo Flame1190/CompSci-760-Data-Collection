@@ -14,8 +14,8 @@
     "data_loader": {
         "type": "SupersamplingDataLoader",
         "args":{
-            "data_dirs": "small_data",
-            "batch_size": 8,
+            "data_dirs": "data/spaceship_clip_2_left",
+            "batch_size": 4,
             "shuffle": true,
             
             "num_workers": 2,
@@ -30,10 +30,11 @@
     "valid_data_loader": {
         "type": "SupersamplingDataLoader",
         "args":{
-            "data_dirs": "small_data",
+            "data_dirs": "data/spaceship_clip_2_left",
             "batch_size": 8,
             "shuffle": true,
             
+            "num_data": 60,
             "num_workers": 2,
             "color_dirname": "color/",
             "depth_dirname": "depth/",
@@ -64,7 +65,7 @@
     "trainer": {
         "epochs": 100,
         "save_dir": "saved/",
-        "save_period": 10,
+        "save_period": 2,
         "verbosity": 2,
         "monitor": "min val_loss",
         "early_stop": 10,
