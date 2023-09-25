@@ -1,13 +1,14 @@
 {
-    "name": "MNSS",
+    "name": "INSS",
     "n_gpu": 2,
     "globals": {
         "scale_factor": 2
     },
     "arch": {
-        "type": "MNSS",
+        "type": "INSS",
         "args": {
-            
+            "f": 32,
+            "m": 2
         }
     },
     "data_loader": {
@@ -69,7 +70,7 @@
         "early_stop": 10,
         "args": {
             "batch_split_size": 2,
-            "method": "mnss",
+            "method": "inss",
             "use_prev_high_res": true
         },
         "tensorboard": false

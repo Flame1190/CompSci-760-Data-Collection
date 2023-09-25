@@ -26,7 +26,7 @@ class INSS(BaseModel):
         
 
         # Warp previous depth and color
-        prev_color, prev_depth = self.warping(prev_color, current_depth, current_motion, prev_depth)
+        prev_color, prev_depth = self.warping(prev_color, prev_depth, current_depth, current_motion)
 
         # Upsample for inpainting
         up_current_color = self.upsample(current_color)

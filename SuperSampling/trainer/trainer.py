@@ -4,7 +4,7 @@ from torchvision.utils import make_grid
 from base import BaseTrainer
 from utils import inf_loop, MetricTracker, no_op
 import torchvision
-from model.loss import NSRRLoss, MNSSLoss
+from model.loss import NSRRLoss, MNSSLoss, INSSLoss
 from time import time
 
 class Trainer(BaseTrainer):
@@ -205,6 +205,48 @@ class Trainer(BaseTrainer):
                 avg_metrics[i] = met(img_ss, target) * weight / (n - 1) # average over clip
 
         return img_ss, avg_loss, avg_metrics
+    
+    def init_inss(self):
+        self.criterion = INSSLoss(
+            alpha=1,
+            beta=1,
+            gamma=0.1
+        ).to(self.device)
+        # if len(self.device_ids) > 1:
+        #     self.criterion = torch.nn.DataParallel(self.criterion, device_ids=self.device_ids)
+
+    def train_inss(self, low_res_list, depth_list, motion_vector_list, target_list, weight=1, accumulate_gradients=True):
+        n = len(low_res_list)
+
+        output = None
+        prev_high_res = None
+        avg_loss = 0
+        avg_metrics = np.zeros(len(self.metric_ftns))
+
+        for i in range(1,n):
+            low_res = low_res_list[i].to(self.device)
+            depth = depth_list[i].to(self.device)
+            prev_depth = depth_list[i-1].to(self.device)
+            motion = motion_vector_list[i].to(self.device)
+            target = target_list[i].to(self.device)
+
+            if i == 1 or self.use_prev_high_res:
+                prev_high_res = target_list[i-1].to(self.device)
+            else:
+                prev_high_res = output.detach()
+
+            output = self.model(low_res, depth, motion, prev_high_res, prev_depth)
+            
+            loss = self.criterion(output, target) * weight / (n - 1) # average over clip
+            if accumulate_gradients:
+                loss.backward()
+
+            avg_loss += loss.item()  
+
+            for i, met in enumerate(self.metric_ftns):
+                avg_metrics[i] = met(output, target) * weight / (n - 1) # average over clip
+
+        return output, avg_loss, avg_metrics
 
     def _valid_epoch(self, epoch):
         """
