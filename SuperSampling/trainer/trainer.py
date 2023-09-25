@@ -2,7 +2,7 @@ import numpy as np
 import torch
 from torchvision.utils import make_grid
 from base import BaseTrainer
-from utils import inf_loop, MetricTracker, no_op
+from utils import inf_loop, MetricTracker, ensure_dir
 import torchvision
 from model.loss import NSRRLoss, MNSSLoss, INSSLoss
 from time import time
@@ -56,7 +56,7 @@ class Trainer(BaseTrainer):
         """
         toImage = torchvision.transforms.ToPILImage()
         output_dir = './output_pic'
-
+        ensure_dir(output_dir)
         # Modifications copied from https://github.com/guanrenyang/NSRR-Reimplementation : trainer/trainer.py
         self.model.train()
         self.train_metrics.reset()
