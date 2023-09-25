@@ -6,6 +6,12 @@ from pathlib import Path
 from itertools import repeat
 from collections import OrderedDict
 import torchvision
+import subprocess
+import sys
+if sys.version_info[0] < 3: 
+    from StringIO import StringIO
+else:
+    from io import StringIO
 
 def no_op(x):
     return x
@@ -87,6 +93,18 @@ def inf_loop(data_loader):
     for loader in repeat(data_loader):
         yield from loader
 
+def get_least_utilized_gpu():
+    # Special thanks https://discuss.pytorch.org/t/it-there-anyway-to-let-program-select-free-gpu-automatically/17560/2
+    gpu_stats = subprocess.check_output(["nvidia-smi", "--format=csv", "--query-gpu=memory.used,memory.free"])
+    gpu_df = pd.read_csv(StringIO(gpu_stats),
+                         names=['memory.used', 'memory.free'],
+                         skiprows=1)
+    print('GPU usage:\n{}'.format(gpu_df))
+    gpu_df['memory.free'] = gpu_df['memory.free'].map(lambda x: x.rstrip(' [MiB]'))
+    idx = gpu_df['memory.free'].idxmax()
+    print('Returning GPU{} with {} free MiB'.format(idx, gpu_df.iloc[idx]['memory.free']))
+    return idx
+
 def prepare_device(n_gpu_use):
     """
     setup GPU device if available. get gpu device indices which are used for DataParallel
@@ -100,8 +118,16 @@ def prepare_device(n_gpu_use):
         print(f"Warning: The number of GPU\'s configured to use is {n_gpu_use}, but only {n_gpu} are "
               "available on this machine.")
         n_gpu_use = n_gpu
-    device = torch.device('cuda:0' if n_gpu_use > 0 else 'cpu')
-    list_ids = list(range(n_gpu_use))
+        
+    device = None
+    list_ids = None
+    if n_gpu_use == 1 and n_gpu > 1:
+        free_gpu_id = get_least_utilized_gpu()
+        torch.cuda.set_device(free_gpu_id)
+        list_ids = [free_gpu_id]
+    else: 
+        device = torch.device('cuda:0' if n_gpu_use > 0 else 'cpu')
+        list_ids = list(range(n_gpu_use))
     return device, list_ids
 
 class MetricTracker:
