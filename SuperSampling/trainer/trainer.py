@@ -56,7 +56,7 @@ class Trainer(BaseTrainer):
         """
         toImage = torchvision.transforms.ToPILImage()
         output_dir = './output_pic'
-        ensure_dir(output_dir)
+        ensure_dir(F"{output_dir}/output")
         # Modifications copied from https://github.com/guanrenyang/NSRR-Reimplementation : trainer/trainer.py
         self.model.train()
         self.train_metrics.reset()
