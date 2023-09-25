@@ -1,0 +1,53 @@
+{
+    "name": "INSS",
+    "n_gpu": 2,
+    "data_loader": {
+        "type": "SupersamplingDataLoader",
+        "args":{
+            "data_dirs": "data/spaceship_clip_2_left",
+            "batch_size": 4,
+            "shuffle": true,
+            
+            "num_workers": 2,
+            "color_dirname": "color/",
+            "depth_dirname": "depth/",
+            "motion_dirname": "motion/",
+            
+	        "output_dimensions": [1200, 1200],
+            "num_frames": 10,
+            "drop_frames": 3
+        }
+    },
+    "valid_data_loader": {
+        "type": "SupersamplingDataLoader",
+        "args":{
+            "data_dirs": "data/spaceship_clip_2_right",
+            "batch_size": 4,
+            "shuffle": true,
+            
+            "num_data": 30,
+            "num_workers": 8,
+            "color_dirname": "color/",
+            "depth_dirname": "depth/",
+            "motion_dirname": "motion/",
+            
+	        "output_dimensions": [1200, 1200],
+            "num_frames": 10,
+            "drop_frames": 3
+        }
+    },
+    "trainer": {
+        "epochs": 100,
+        "save_dir": "saved/",
+        "save_period": 2,
+        "verbosity": 2,
+        "monitor": "min val_loss",
+        "early_stop": 10,
+        "args": {
+            "batch_split_size": 2,
+            "method": "inss",
+            "use_prev_high_res": false
+        },
+        "tensorboard": false
+    }
+}
