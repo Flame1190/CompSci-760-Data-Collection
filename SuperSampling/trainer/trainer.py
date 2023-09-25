@@ -208,7 +208,7 @@ class Trainer(BaseTrainer):
     
     def init_inss(self):
         self.criterion = INSSLoss(
-            alpha=1,
+            alpha=1.5,
             beta=1,
             gamma=0.1
         ).to(self.device)

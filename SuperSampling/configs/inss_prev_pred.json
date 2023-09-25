@@ -21,7 +21,7 @@
     "valid_data_loader": {
         "type": "SupersamplingDataLoader",
         "args":{
-            "data_dirs": "data/spaceship_clip_2_left",
+            "data_dirs": "data/spaceship_clip_2_right",
             "batch_size": 4,
             "shuffle": true,
             

@@ -7,8 +7,8 @@
     "arch": {
         "type": "INSS",
         "args": {
-            "f": 32,
-            "m": 4
+            "f": 64,
+            "m": 5
         }
     },
     "data_loader": {
