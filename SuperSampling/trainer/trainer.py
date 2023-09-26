@@ -56,7 +56,7 @@ class Trainer(BaseTrainer):
         :return: A log that contains average loss and metric in this epoch.
         """
         toImage = torchvision.transforms.ToPILImage()
-        output_dir = './output_pic'
+        output_dir = './results'
         ensure_dir(F"{output_dir}/output")
         # Modifications copied from https://github.com/guanrenyang/NSRR-Reimplementation : trainer/trainer.py
         self.model.train()
