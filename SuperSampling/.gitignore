@@ -115,3 +115,4 @@ output_pic/
 debug/
 output_pic_test/
 .DS_Store
+results/
