@@ -19,6 +19,7 @@ class Trainer(BaseTrainer):
         assert f"train_{method}" in Trainer.__dict__
 
         self.config = config
+        self.scale_factor = config["globals"]["scale_factor"]
         self.device = device
         self.device_ids = device_ids
         self.data_loader = data_loader
@@ -247,6 +248,61 @@ class Trainer(BaseTrainer):
                 avg_metrics[i] += met(output, target) * weight / (n - 1) # average over clip
 
         return output, avg_loss, avg_metrics
+
+    def init_enss(self):
+        self.criterion = torch.nn.L1Loss().to(self.device)
+
+    def train_enss(self, low_res_list, depth_list, motion_vector_list, target_list, weight=1, accumulate_gradients=True):
+        # create a random 264 x 264 patch at the target resolution
+        patch_size_HR = 264
+        patch_size_LR = patch_size_HR // self.scale_factor
+        _, _, H_HR, W_HR = target_list[0].shape
+        
+        idx_h = np.random.randint(0, H_HR - 264)
+        idx_w = np.random.randint(0, W_HR - 264)
+        get_target_patch_high_res = lambda x : x[:, :, idx_h:idx_h+patch_size_HR, idx_w:idx_w+patch_size_HR]
+        
+        idx_h = idx_h // self.scale_factor
+        idx_w = idx_w // self.scale_factor
+        get_target_patch_low_res = lambda x : x[:, :, idx_h:idx_h+patch_size_LR, idx_w:idx_w+patch_size_LR]
+
+        # get target patches
+        target_list = [get_target_patch_high_res(target) for target in target_list]
+        low_res_list = [get_target_patch_low_res(low_res) for low_res in low_res_list]
+        depth_list = [get_target_patch_low_res(depth) for depth in depth_list]
+        motion_vector_list = [get_target_patch_low_res(motion_vector) for motion_vector in motion_vector_list]
+        
+        # feature and color reccurent training
+        n = len(low_res_list)
+        
+        loss = 0
+        metrics = np.zeros(len(self.metric_ftns))
+
+        prev_color = target_list[0].clone().to(self.device)
+        prev_features = torch.zeros_like(target_list[0]).to(self.device)
+
+        for i in range(1,n):
+            low_res = low_res_list[i].to(self.device)
+            depth = depth_list[i].to(self.device)
+            motion = motion_vector_list[i].to(self.device)
+            target = target_list[i].to(self.device)
+
+            output, new_features = self.model(low_res, depth, motion, prev_color, prev_features)
+            
+            loss += self.criterion(output, target) * weight / (n - 1) # average over clip
+
+            for i, met in enumerate(self.metric_ftns):
+                metrics[i] += met(output, target) * weight / (n - 1) # average over clip
+
+            prev_color = output
+            prev_features = new_features
+
+        if accumulate_gradients:
+            loss.backward()
+
+        return prev_color, loss, metrics
+
+
 
     def _valid_epoch(self, epoch):
         """
