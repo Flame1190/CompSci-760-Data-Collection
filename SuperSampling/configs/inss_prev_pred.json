@@ -4,8 +4,14 @@
     "data_loader": {
         "type": "SupersamplingDataLoader",
         "args":{
-            "data_dirs": "data/spaceship_clip_2_left",
-            "batch_size": 4,
+            "data_dirs":  [
+                "data/spaceship_clip_2_left",
+                "data/Clip_4/left",
+                "data/Clip_3/left",
+                "data/Clip_2/left",
+                "data/Clip_1/left"
+            ],
+            "batch_size": 8,
             "shuffle": true,
             
             "num_workers": 2,
@@ -14,26 +20,27 @@
             "motion_dirname": "motion/",
             
 	        "output_dimensions": [1200, 1200],
-            "num_frames": 10,
-            "drop_frames": 3
+            "num_frames": 16,
+            "drop_frames": 8
         }
     },
     "valid_data_loader": {
         "type": "SupersamplingDataLoader",
         "args":{
-            "data_dirs": "data/spaceship_clip_2_right",
-            "batch_size": 4,
+            "data_dirs": [
+                "data/Clip_0/left"
+            ],
+            "batch_size": 8,
             "shuffle": true,
             
-            "num_data": 30,
-            "num_workers": 8,
+            "num_workers": 2,
             "color_dirname": "color/",
             "depth_dirname": "depth/",
             "motion_dirname": "motion/",
             
 	        "output_dimensions": [1200, 1200],
-            "num_frames": 10,
-            "drop_frames": 3
+            "num_frames": 16,
+            "drop_frames": 8
         }
     },
     "trainer": {
@@ -44,6 +51,7 @@
         "monitor": "min val_loss",
         "early_stop": 10,
         "args": {
+            "image_verbosity": 8,
             "batch_split_size": 2,
             "method": "inss",
             "use_prev_high_res": false
