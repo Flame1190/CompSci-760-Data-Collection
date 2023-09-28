@@ -13,7 +13,8 @@ class Trainer(BaseTrainer):
     """
     def __init__(self, model, metric_ftns, optimizer, config, device,
                  data_loader, valid_data_loader=None, lr_scheduler=None, len_epoch=None, 
-                 batch_split_size=None, method=None, use_prev_high_res=False, device_ids=None):
+                 batch_split_size=None, method=None, use_prev_high_res=False, device_ids=None,
+                 image_verbosity=None):
         assert method is not None
         assert f"init_{method}" in Trainer.__dict__
         assert f"train_{method}" in Trainer.__dict__
@@ -37,6 +38,7 @@ class Trainer(BaseTrainer):
         self.log_step = int(np.sqrt(data_loader.batch_size))
         self.batch_split_size = batch_split_size
         self.use_prev_high_res = use_prev_high_res
+        self.image_verbosity = image_verbosity
         
         # initilize training method
         getattr(self, f"init_{method}")()
@@ -69,7 +71,7 @@ class Trainer(BaseTrainer):
             total_loss = 0
             total_metrics = np.zeros(len(self.metric_ftns))
 
-            output = torch.zeros_like(target_list[0])
+            # output = torch.zeros_like(target_list[0])
 
             self.optimizer.zero_grad()
             while batch_split_idx < batch_size:
@@ -89,8 +91,8 @@ class Trainer(BaseTrainer):
                 total_loss += loss
                 total_metrics += metrics
 
+                output = sub_batch_output
                 # prepare for next sub-batch
-                output[batch_split_idx:batch_split_idx_end] = sub_batch_output[:]
                 batch_split_idx += self.batch_split_size
 
 
@@ -98,8 +100,8 @@ class Trainer(BaseTrainer):
 
             # Save batch result
             image_name = f'epoch_{epoch}_batch_{batch_idx}.png'
-            # TODO: use verbosity
-            if batch_idx % 4 == 0:
+
+            if batch_idx % self.image_verbosity == 0:
                 toImage(output[0]).save(f'{output_dir}/output/{image_name}', format='PNG')
                 
 
@@ -254,12 +256,12 @@ class Trainer(BaseTrainer):
 
     def train_enss(self, low_res_list, depth_list, motion_vector_list, target_list, weight=1, accumulate_gradients=True):
         # create a random 264 x 264 patch at the target resolution
-        patch_size_HR = 264
+        patch_size_HR = 528
         patch_size_LR = patch_size_HR // self.scale_factor
-        _, _, H_HR, W_HR = target_list[0].shape
+        B, _, H_HR, W_HR = target_list[0].shape
         
-        idx_h = np.random.randint(0, H_HR - 264)
-        idx_w = np.random.randint(0, W_HR - 264)
+        idx_h = np.random.randint(0, H_HR - patch_size_HR)
+        idx_w = np.random.randint(0, W_HR - patch_size_HR)
         get_target_patch_high_res = lambda x : x[:, :, idx_h:idx_h+patch_size_HR, idx_w:idx_w+patch_size_HR]
         
         idx_h = idx_h // self.scale_factor
@@ -279,13 +281,16 @@ class Trainer(BaseTrainer):
         metrics = np.zeros(len(self.metric_ftns))
 
         prev_color = target_list[0].clone().to(self.device)
-        prev_features = torch.zeros_like(target_list[0]).to(self.device)
+        prev_features = torch.zeros(B, 1, patch_size_HR, patch_size_HR).to(self.device)
 
         for i in range(1,n):
             low_res = low_res_list[i].to(self.device)
             depth = depth_list[i].to(self.device)
             motion = motion_vector_list[i].to(self.device)
             target = target_list[i].to(self.device)
+
+            if self.use_prev_high_res:
+                prev_color = target_list[i-1].to(self.device)
 
             output, new_features = self.model(low_res, depth, motion, prev_color, prev_features)
             
@@ -321,7 +326,7 @@ class Trainer(BaseTrainer):
 
                 total_loss = 0
                 total_metrics = np.zeros(len(self.metric_ftns))
-                output = torch.zeros_like(target_list[0])
+                # output = None
 
                 while batch_split_idx < batch_size:
                     # split batch into sub-batches
@@ -334,7 +339,7 @@ class Trainer(BaseTrainer):
                     sub_batch_target_list = [target[batch_split_idx:batch_split_idx_end] for target in target_list]
 
                     # forward pass
-                    sub_batch_output, loss, metrics = self.training_method(
+                    _, loss, metrics = self.training_method(
                         sub_batch_low_res_list, sub_batch_depth_list, sub_batch_motion_vector_list, sub_batch_target_list,
                         weight = (sub_batch_size / batch_size),
                         accumulate_gradients = False
@@ -344,8 +349,8 @@ class Trainer(BaseTrainer):
                     total_loss += loss
                     total_metrics += metrics
 
+                    # output = sub_batch_output
                     # prepare for next sub-batch
-                    output[batch_split_idx:batch_split_idx_end] = sub_batch_output[:]
                     batch_split_idx += self.batch_split_size
 
                 self.writer.set_step((epoch - 1) * len(self.valid_data_loader) + batch_idx, 'valid')

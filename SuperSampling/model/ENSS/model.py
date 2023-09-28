@@ -1,9 +1,10 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from base import BaseModel
 from utils import flatten, warp
 
-class ENSSNoJitter(nn.Module):
+class ENSSNoJitter(BaseModel):
     def __init__(self, scale_factor: int, f: int, m: int):
         super().__init__()
         self.scale_factor = scale_factor
@@ -37,7 +38,7 @@ class ENSSNoJitter(nn.Module):
         )
         return self.depth_to_space(current_color), self.depth_to_space(current_features)
 
-class Network(nn.Module):
+class Network(BaseModel):
     def __init__(self, scale_factor: int, f: int, m: int) -> None:
         super().__init__()
         # color, depth, !jitter, prev_features, prev_color
@@ -65,7 +66,10 @@ class Network(nn.Module):
                 current_depth,
                 previous_color,
                 previous_features) -> tuple[torch.Tensor, torch.Tensor]:
-
+        # print("current_color", current_color.shape)
+        # print("current_depth", current_depth.shape)
+        # print("previous_color", previous_color.shape)
+        # print("previous_features", previous_features.shape)
         x = torch.cat([
             current_color,
             current_depth,
@@ -80,7 +84,7 @@ class Network(nn.Module):
         color = color * mask + previous_color * (1 - mask)
         return color, features
 
-class Warping(nn.Module):
+class Warping(BaseModel):
     def __init__(self, scale_factor: int, dilation_block_size: int) -> None:
         super().__init__()
         assert dilation_block_size % scale_factor == 0
@@ -91,7 +95,7 @@ class Warping(nn.Module):
     def depth_dilate(self, depth: torch.Tensor, motion: torch.Tensor):
         low_res_block_size = self.dilation_block_size // self.scale_factor
         B, C, H, W = motion.shape
-        _, indices = F.max_pool2d_with_indices(-depth, low_res_block_size, low_res_block_size)
+        _, indices = F.max_pool2d_with_indices(depth, low_res_block_size, low_res_block_size)
         indices = indices.view(B, 1, -1).repeat(1, 2, 1)
         
         motion = motion.flatten(start_dim=2)

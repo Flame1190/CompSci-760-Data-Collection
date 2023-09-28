@@ -14,8 +14,12 @@
     "data_loader": {
         "type": "SupersamplingDataLoader",
         "args":{
-            "data_dirs": "data/spaceship_clip_2_left",
-            "batch_size": 4,
+            "data_dirs":  [
+                "data/spaceship_clip_2_left",
+                "data/Clip_2/left",
+                "data/Clip_1/left"
+            ],
+            "batch_size": 8,
             "shuffle": true,
             
             "num_workers": 2,
@@ -30,7 +34,9 @@
     "valid_data_loader": {
         "type": "SupersamplingDataLoader",
         "args":{
-            "data_dirs": "data/spaceship_clip_2_left",
+            "data_dirs": [
+                "data/Clip_0/left"
+            ],
             "batch_size": 8,
             "shuffle": true,
             
@@ -47,8 +53,8 @@
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 0.001, 
-            "weight_decay": 0.00001,
+            "lr": 0.0001, 
+            "weight_decay": 0.000001,
             "amsgrad": true
         }
     },
@@ -58,8 +64,8 @@
     "lr_scheduler": {
         "type": "StepLR",
         "args": {
-            "step_size": 50,
-            "gamma": 0.1
+            "step_size": 20,
+            "gamma": 0.5
         }
     },
     "trainer": {
@@ -70,6 +76,7 @@
         "monitor": "min val_loss",
         "early_stop": 10,
         "args": {
+            "image_verbosity": 8,
             "batch_split_size": 2,
             "method": "inss",
             "use_prev_high_res": true
