@@ -36,7 +36,8 @@ class SupersamplingDataLoader(BaseDataLoader):
                  num_workers: int = 1,
                  num_data: Union[int, None] = None,
                  output_dimensions: Union[int, None] = None,
-                 drop_frames: int | None = None
+                 drop_frames: int | None = None,
+                 reverse: bool  = True
                  ):
         self.dataset = SupersamplingDataset(data_dirs=data_dirs,
                               color_dirname=color_dirname,
@@ -47,7 +48,8 @@ class SupersamplingDataLoader(BaseDataLoader):
                               output_dimensions=output_dimensions,
                               num_frames=num_frames,
                               shuffle=shuffle,
-                              drop_frames=drop_frames
+                              drop_frames=drop_frames,
+                              reverse=reverse
                               )
         super().__init__(dataset=self.dataset,
                          batch_size=batch_size,
@@ -70,7 +72,8 @@ class SupersamplingDataset(Dataset):
                  shuffle: bool,
                  output_dimensions: None | Tuple[int, int] = None,
                  num_data: Union[int, None] = None,
-                 drop_frames: int | None = None
+                 drop_frames: int | None = None,
+                 reverse: bool = True
                  ):
         super().__init__()
 
@@ -97,6 +100,7 @@ class SupersamplingDataset(Dataset):
         self.data_list = []
         # maintain a buffer for the last num_frames frames
         img_name_buffer = deque(maxlen=num_frames) 
+        step = -1 if reverse else 1
 
         for clip_dir in self.clips.keys():
             clip = self.clips[clip_dir]
@@ -104,7 +108,7 @@ class SupersamplingDataset(Dataset):
                 
                 img_name_buffer.appendleft(img_name)
                 if len(img_name_buffer) == num_frames:
-                    self.data_list.append((clip_dir, list(img_name_buffer)))
+                    self.data_list.append((clip_dir, list(img_name_buffer)[::step]))
 
                     if drop_frames is not None:
                         for _ in range(drop_frames):
@@ -126,6 +130,7 @@ class SupersamplingDataset(Dataset):
             tf.Lambda(lambda x: x[[2,1,0]]), # BGR to RGB (for cv2)
         ])
 
+        # print(data)
         view_list, depth_list, motion_list, truth_list = [], [], [], []
         # elements in the lists following the order: current frame i, pre i-1, pre i-2, pre i-3, pre i-4
         for frame in data:
