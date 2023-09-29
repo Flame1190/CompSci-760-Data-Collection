@@ -121,7 +121,6 @@ class SupersamplingDataset(Dataset):
             self.data_list = random.sample(self.data_list, min(len(self.data_list), num_data))
         else:
             self.data_list = self.data_list[:num_data]
-
     
     def __getitem__(self, index):
         clip_dir, data = self.data_list[index]
