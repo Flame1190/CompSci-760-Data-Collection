@@ -6,6 +6,7 @@ TagManager:
   tags:
   - LeftCam
   - RightCam
+  - StereoCam
   layers:
   - Default
   - TransparentFX

@@ -14,6 +14,7 @@ public class CaptureReplay : MonoBehaviour
 
     [SerializeField] Transform _replayLeftEye;
     [SerializeField] Transform _replayRightEye;
+    [SerializeField] Transform _replayStereoCam;
 
     bool _recording;
     bool _playLoop;
@@ -21,6 +22,8 @@ public class CaptureReplay : MonoBehaviour
     bool _viewOculus;
     int _fpsCounter;
     float _fpsTime;
+
+    int _stereoStateIndex;
 
     Replay _replay;
 
@@ -38,12 +41,18 @@ public class CaptureReplay : MonoBehaviour
     [SerializeField] bool _loopPlayOnStart;
     [SerializeField] int _onStartIndex;
 
+    [SerializeField] bool _stereoMode;
+
     private void Awake()
     {
         SaveAndLoad.Load();
 
         if (_loopPlayOnStart)
         {
+            _replayLeftEye.gameObject.SetActive(!_stereoMode);
+            _replayRightEye.gameObject.SetActive(!_stereoMode);
+            _replayStereoCam.gameObject.SetActive(_stereoMode);
+
             _inputField.text = "" + _onStartIndex;
             LoadReplay();
             TogglePlayLoop();
@@ -61,11 +70,6 @@ public class CaptureReplay : MonoBehaviour
         if (SaveAndLoad.Loaded())
         {
             _replayCountText.text = "Saved Replays: " + SaveAndLoad.data.GetReplayCount();
-        }
-
-        if (_replay != null)
-        {
-            _frameCountText.text = "Frames: " + _frameIndex + "/" + _replay.GetFrameCount();
         }
 
         if (_recording)
@@ -159,13 +163,34 @@ public class CaptureReplay : MonoBehaviour
         _oculusLeftEye.gameObject.SetActive(_viewOculus);
         _oculusRightEye.gameObject.SetActive(_viewOculus);
 
-        _replayLeftEye.gameObject.SetActive(!_viewOculus);
-        _replayRightEye.gameObject.SetActive(!_viewOculus);
+        _replayLeftEye.gameObject.SetActive(!_viewOculus && !_stereoMode);
+        _replayRightEye.gameObject.SetActive(!_viewOculus && !_stereoMode);
+        _replayStereoCam.gameObject.SetActive(!_viewOculus && _stereoMode);
     }
 
     public void LoadFrameAdd(int offset)
     {
-        LoadFrameSet(_frameIndex + offset);
+        if (_stereoMode && _frameIndex >= 0 && offset == 1)
+        {
+            _stereoStateIndex++;
+
+            if (_stereoStateIndex < 3)
+            {
+                LoadFrameSet(_frameIndex);
+            }
+            else
+            {
+                _stereoStateIndex = 0;
+
+                LoadFrameSet(_frameIndex + offset);
+            }
+        }
+        else
+        {
+            _stereoStateIndex = 0;
+
+            LoadFrameSet(_frameIndex + offset);
+        }
     }
 
     void LoadFrameSet(int newIndex)
@@ -176,10 +201,22 @@ public class CaptureReplay : MonoBehaviour
 
         Replay.FrameInfo frameInfo = _replay.GetFrameInfo(_frameIndex);
 
-        _replayLeftEye.transform.position = frameInfo.GetEyeInfo(0).Position;
-        _replayLeftEye.transform.rotation = frameInfo.GetEyeInfo(0).Rotation;
+        if (!_stereoMode)
+        {
+            _replayLeftEye.transform.position = frameInfo.GetEyeInfo(0).Position;
+            _replayLeftEye.transform.rotation = frameInfo.GetEyeInfo(0).Rotation;
 
-        _replayRightEye.transform.position = frameInfo.GetEyeInfo(1).Position;
-        _replayRightEye.transform.rotation = frameInfo.GetEyeInfo(1).Rotation;
+            _replayRightEye.transform.position = frameInfo.GetEyeInfo(1).Position;
+            _replayRightEye.transform.rotation = frameInfo.GetEyeInfo(1).Rotation;
+
+            _frameCountText.text = "Frames: " + _frameIndex + "/" + _replay.GetFrameCount();
+        }
+        else
+        {
+            _replayStereoCam.transform.position = frameInfo.GetEyeInfo(_stereoStateIndex % 2).Position;
+            _replayStereoCam.transform.rotation = frameInfo.GetEyeInfo(_stereoStateIndex % 2).Rotation;
+
+            _frameCountText.text = "Frames: " + _frameIndex + "(" + _stereoStateIndex + ")" + "/" + _replay.GetFrameCount();
+        }
     }
 }
