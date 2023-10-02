@@ -7614,7 +7614,7 @@ MonoBehaviour:
   _fpsText: {fileID: 1736160030}
   path: D:\COMPSCI 760 Data
   _loopPlayOnStart: 1
-  _onStartIndex: 3
+  _onStartIndex: 4
 --- !u!4 &1084885500
 Transform:
   m_ObjectHideFlags: 0
@@ -23273,7 +23273,7 @@ PrefabInstance:
     - target: {fileID: 1733508889401418365, guid: 0990f3d323fb6a346a5cde9cb9dafba2,
         type: 3}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1733508889401418367, guid: 0990f3d323fb6a346a5cde9cb9dafba2,
         type: 3}
