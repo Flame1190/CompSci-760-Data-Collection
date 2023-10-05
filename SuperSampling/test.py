@@ -152,7 +152,7 @@ def main(config):
         num_frames=config['data_loader']['args']['num_frames'],
         scale_factor=scale_factor,
         output_dimensions=config['data_loader']['args']['output_dimensions'],
-        num_data=config["data_loader"]["args"]["num_data"]
+        # num_data=config["data_loader"]["args"]["num_data"]
     )
 
     # build model architecture

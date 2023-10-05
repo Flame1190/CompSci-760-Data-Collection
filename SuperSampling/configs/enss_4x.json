@@ -80,7 +80,7 @@
         "args": {
             "batch_split_size": 8,
             "method": "enss",
-            "use_prev_high_res": false
+            "use_prev_high_res": true
         },
         "tensorboard": false
     }
