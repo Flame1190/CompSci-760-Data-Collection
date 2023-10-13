@@ -4,7 +4,7 @@ from torchvision.utils import make_grid
 from base import BaseTrainer
 from utils import inf_loop, MetricTracker, ensure_dir
 import torchvision
-from model.loss import NSRRLoss, MNSSLoss, INSSLoss
+from model.loss import NSRRLoss, MNSSLoss, INSSLoss, SINSSLoss
 from time import time
 
 class Trainer(BaseTrainer):
@@ -249,6 +249,64 @@ class Trainer(BaseTrainer):
             for i, met in enumerate(self.metric_ftns):
                 avg_metrics[i] += met(output, target) * weight / (n - 1) # average over clip
 
+        return output, avg_loss, avg_metrics
+
+    def init_sinss(self):
+        self.criterion = SINSSLoss(
+            alpha=1.5,
+            beta=1,
+            gamma=0.1
+        ).to(self.device)
+        # if len(self.device_ids) > 1:
+        #     self.criterion = torch.nn.DataParallel(self.criterion, device_ids=self.device_ids)
+
+    def train_sinss(self, low_res_list, depth_list, motion_vector_list, target_list, weight=1, accumulate_gradients=True):
+        B, test, C, H, W = target_list[0].shape
+        assert test == 2, "SINSS requires a stereo pair"
+        low_res_list = [tensor.permute(1, 0, 2, 3, 4) for tensor in low_res_list]
+        depth_list = [tensor.permute(1, 0, 2, 3, 4) for tensor in depth_list]
+        motion_vector_list = [tensor.permute(1, 0, 2, 3, 4) for tensor in motion_vector_list]
+        target_list = [tensor.permute(1, 0, 2, 3, 4) for tensor in target_list]
+
+        n = len(low_res_list)
+         
+        output = None
+        left_prev_high_res, right_prev_high_res = None, None
+        avg_loss = 0
+        avg_metrics = np.zeros(len(self.metric_ftns))
+
+        for i in range(1,n):
+            left_low_res, right_low_res = low_res_list[i].to(self.device)
+            left_depth, right_depth = depth_list[i].to(self.device)
+            left_prev_depth, right_prev_depth = depth_list[i-1].to(self.device)
+            left_motion, right_motion = motion_vector_list[i].to(self.device)
+            left_target, right_target = target_list[i].to(self.device)
+
+            if i == 1 or self.use_prev_high_res:
+                left_prev_high_res, right_prev_high_res = target_list[i-1].to(self.device)
+            else:
+                left_prev_high_res, right_prev_high_res = output.detach()
+
+            left_output, right_output = self.model(
+                left_low_res, left_depth, left_motion, left_prev_high_res, left_prev_depth,
+                right_low_res, right_depth, right_motion, right_prev_high_res, right_prev_depth
+            )
+            
+            loss = self.criterion(left_output, left_target, right_output, right_target) * weight / (n - 1) # average over clip
+            
+            if accumulate_gradients:
+                loss.backward()
+
+            avg_loss += loss.item()  
+
+            for i, met in enumerate(self.metric_ftns):
+                avg_metrics[i] += met(left_output, left_target) * weight / (n - 1) # average over clip
+                avg_metrics[i] += met(right_output, right_target) * weight / (n - 1) # average over clip
+                avg_metrics[i] *= 0.5 # average over stereo pair
+
+            output = (left_output.detach(), right_output.detach())
+        
+        output = torch.cat((output[0], output[1]), dim=3)
         return output, avg_loss, avg_metrics
 
     def init_enss(self):

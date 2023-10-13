@@ -58,6 +58,59 @@ class SupersamplingDataLoader(BaseDataLoader):
                          num_workers=num_workers,
                          )
 
+class StereoSuperSamplingDataLoader(BaseDataLoader):
+    def __init__(self,
+                 data_dirs: str,
+                 left_dirname: str,
+                 right_dirname: str, 
+                 color_dirname: str,
+                 depth_dirname: str,
+                 motion_dirname: str,
+                 batch_size: int,
+                 scale_factor: int,
+                 num_frames: int,
+                 shuffle: bool = True,
+                 num_workers: int = 1,
+                 num_data: Union[int, None] = None,
+                 output_dimensions: Union[int, None] = None,
+                 drop_frames: int | None = None,
+                 reverse: bool  = True
+                 ):
+        left_data_dirs = [os.path.join(data_dir, left_dirname) for data_dir in data_dirs]
+        right_data_dirs = [os.path.join(data_dir, right_dirname) for data_dir in data_dirs]
+
+        self.left_dataset = SupersamplingDataset(data_dirs=left_data_dirs,
+                              color_dirname=color_dirname,
+                              depth_dirname=depth_dirname,
+                              motion_dirname=motion_dirname,
+                              scale_factor=scale_factor,
+                              num_data=num_data,
+                              output_dimensions=output_dimensions,
+                              num_frames=num_frames,
+                              shuffle=False,
+                              drop_frames=drop_frames,
+                              reverse=reverse
+                              )
+        self.right_dataset = SupersamplingDataset(data_dirs=right_data_dirs,
+                              color_dirname=color_dirname,
+                              depth_dirname=depth_dirname,
+                              motion_dirname=motion_dirname,
+                              scale_factor=scale_factor,
+                              num_data=num_data,
+                              output_dimensions=output_dimensions,
+                              num_frames=num_frames,
+                              shuffle=False,
+                              drop_frames=drop_frames,
+                              reverse=reverse
+                              )
+        self.dataset = StereoSupersamplingDataset(left_dataset=self.left_dataset, right_dataset=self.right_dataset)
+
+        super().__init__(dataset=self.dataset,
+                         batch_size=batch_size,
+                         shuffle=shuffle,
+                         validation_split=0, # read doc string note
+                         num_workers=num_workers,
+                         )
 class SupersamplingDataset(Dataset):
     """
     Requires that corresponding view, depth and motion frames share the same name.
@@ -173,3 +226,28 @@ class SupersamplingDataset(Dataset):
         return len(self.data_list)
 
 
+
+class StereoSupersamplingDataset(Dataset):
+    def __init__(self, 
+                 left_dataset: SupersamplingDataset,
+                 right_dataset: SupersamplingDataset
+                 ) -> None:
+        super().__init__(self)
+        self.left_dataset = left_dataset
+        self.right_dataset = right_dataset
+
+    def __getitem__(self, index):
+        left_views, left_depths, left_motion, left_truth = self.left_dataset[index]
+        right_views, right_depths, right_motion, right_truth = self.right_dataset[index]
+
+        assert len(left_views) == len(right_views)
+        n = len(left_views)
+
+        mixed_views = [left_views[i].cat(right_views[i], dim=0).unsqueeze(0) for i in range(n)]
+        mixed_depths = [left_depths[i].cat(right_depths[i], dim=0).unsqueeze(0) for i in range(n)]
+        mixed_motion = [left_motion[i].cat(right_motion[i], dim=0).unsqueeze(0) for i in range(n)]
+        mixed_truth = [left_truth[i].cat(right_truth[i], dim=0).unsqueeze(0) for i in range(n)]
+        return mixed_views, mixed_depths, mixed_motion, mixed_truth
+
+    def __len__(self) -> int:
+        return min(len(self.left_dataset), len(self.right_dataset))

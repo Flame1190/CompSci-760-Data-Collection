@@ -1,0 +1,88 @@
+{
+    "name": "SINSS",
+    "n_gpu": 2,
+    "globals": {
+        "scale_factor": 2
+    },
+    "arch": {
+        "type": "SINSS",
+        "args": {
+            "f": 32,
+            "m": 2
+        }
+    },
+    "data_loader": {
+        "type": "StereoSuperSamplingDataLoader",
+        "args":{
+            "data_dirs":  [
+                "data/spaceship_clip_2_left",
+                "data/Clip_4/left",
+                "data/Clip_3/left",
+                "data/Clip_2/left",
+                "data/Clip_1/left"
+            ],
+            "batch_size": 8,
+            "shuffle": true,
+            
+            "num_workers": 4,
+            "left_dirname": "color/",
+            "right_dirname": "color/",
+            "color_dirname": "color/",
+            "depth_dirname": "depth/",
+            "motion_dirname": "motion/",
+            
+	        "output_dimensions": [1200, 1200],
+            "num_frames": 2
+        }
+    },
+    "valid_data_loader": {
+        "type": "SupersamplingDataLoader",
+        "args":{
+            "data_dirs": [
+                "data/Clip_0/left"
+            ],
+            "batch_size": 8,
+            "shuffle": true,
+            "num_workers": 4,
+            "color_dirname": "color/",
+            "depth_dirname": "depth/",
+            "motion_dirname": "motion/",
+            
+	        "output_dimensions": [1200, 1200],
+            "num_frames": 2
+        }
+    },
+    "optimizer": {
+        "type": "Adam",
+        "args":{
+            "lr": 0.001, 
+            "weight_decay": 0.00001,
+            "amsgrad": true
+        }
+    },
+    "metrics": [
+        "psnr","ssim"
+    ],
+    "lr_scheduler": {
+        "type": "StepLR",
+        "args": {
+            "step_size": 10,
+            "gamma": 0.5
+        }
+    },
+    "trainer": {
+        "epochs": 100,
+        "save_dir": "saved/",
+        "save_period": 2,
+        "verbosity": 2,
+        "monitor": "min val_loss",
+        "early_stop": 10,
+        "args": {
+            "image_verbosity": 8,
+            "batch_split_size": 2,
+            "method": "inss",
+            "use_prev_high_res": true
+        },
+        "tensorboard": false
+    }
+}
