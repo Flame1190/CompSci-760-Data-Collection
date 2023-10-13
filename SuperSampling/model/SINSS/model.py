@@ -77,11 +77,11 @@ class SINSS(BaseModel):
         )
 
         # reconstruct
-        left_residuals, left_mask = self.net(left_current_color, left_current_depth, left_prev_color)
+        left_residuals, left_mask = self.net(left_current_color, left_current_depth, left_prev_color, right_warped_color)
         left_mix = left_mask * left_residuals + (1 - left_mask) * left_prev_color
         left_mix = self.depth_to_space(left_mix)
 
-        right_residuals, right_mask = self.net(right_current_color, right_current_depth, right_prev_color)
+        right_residuals, right_mask = self.net(right_current_color, right_current_depth, right_prev_color, left_warped_color)
         right_mix = right_mask * right_residuals + (1 - right_mask) * right_prev_color
         right_mix = self.depth_to_space(right_mix)
 
@@ -117,8 +117,8 @@ class Network(BaseModel):
             nn.Sigmoid(), # maybe hard-tanh?
         )
 
-    def forward(self, current_color, current_depth, warped_color):
-        x = torch.cat([current_color, current_depth, warped_color], dim=1)
+    def forward(self, current_color, current_depth, warped_color, opp_cur_color):
+        x = torch.cat([current_color, current_depth, warped_color, opp_cur_color], dim=1)
         x = self.net(x)
 
         # residuals, mask = x[:, :self.shuffled_channel_count], x[:, self.shuffled_channel_count:]

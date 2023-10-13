@@ -232,7 +232,7 @@ class StereoSupersamplingDataset(Dataset):
                  left_dataset: SupersamplingDataset,
                  right_dataset: SupersamplingDataset
                  ) -> None:
-        super().__init__(self)
+        super().__init__()
         self.left_dataset = left_dataset
         self.right_dataset = right_dataset
 
@@ -243,10 +243,10 @@ class StereoSupersamplingDataset(Dataset):
         assert len(left_views) == len(right_views)
         n = len(left_views)
 
-        mixed_views = [left_views[i].cat(right_views[i], dim=0).unsqueeze(0) for i in range(n)]
-        mixed_depths = [left_depths[i].cat(right_depths[i], dim=0).unsqueeze(0) for i in range(n)]
-        mixed_motion = [left_motion[i].cat(right_motion[i], dim=0).unsqueeze(0) for i in range(n)]
-        mixed_truth = [left_truth[i].cat(right_truth[i], dim=0).unsqueeze(0) for i in range(n)]
+        mixed_views = [torch.cat((left_views[i].unsqueeze(0), right_views[i].unsqueeze(0)), dim=0) for i in range(n)]
+        mixed_depths = [torch.cat((left_depths[i].unsqueeze(0), right_depths[i].unsqueeze(0)), dim=0) for i in range(n)]
+        mixed_motion = [torch.cat((left_motion[i].unsqueeze(0), right_motion[i].unsqueeze(0)), dim=0) for i in range(n)]
+        mixed_truth = [torch.cat((left_truth[i].unsqueeze(0), right_truth[i].unsqueeze(0)), dim=0) for i in range(n)]
         return mixed_views, mixed_depths, mixed_motion, mixed_truth
 
     def __len__(self) -> int:

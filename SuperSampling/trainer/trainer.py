@@ -64,7 +64,11 @@ class Trainer(BaseTrainer):
         self.model.train()
         self.train_metrics.reset()
         t0 = time()
+
+        is_stereo = False
         for batch_idx, [low_res_list, depth_list, motion_vector_list, target_list] in enumerate(self.data_loader):
+            is_stereo = len(low_res_list[0].shape) == 5 # dodgy
+
             batch_split_idx = 0
             batch_size = low_res_list[0].shape[0]
 
@@ -111,11 +115,14 @@ class Trainer(BaseTrainer):
                 self.train_metrics.update(met.__name__, total_metrics[i])
 
             if batch_idx % self.log_step == 0:
+                img = low_res_list[0]
+                if is_stereo:
+                    img = img.permute(1,0,2,3,4)[0]
                 self.logger.debug('Train Epoch: {} {} Loss: {:.6f}'.format(
                     epoch,
                     self._progress(batch_idx),
                     total_loss))
-                self.writer.add_image('input', make_grid(low_res_list[0].cpu(), nrow=8, normalize=True))
+                self.writer.add_image('input', make_grid(img.cpu(), nrow=8, normalize=True))
 
             if batch_idx == self.len_epoch:
                 break
@@ -377,8 +384,10 @@ class Trainer(BaseTrainer):
         self.model.eval()
         self.valid_metrics.reset()
         t0 = time()
+        is_stereo = False
         with torch.no_grad():
             for batch_idx, [low_res_list, depth_list, motion_vector_list, target_list] in enumerate(self.valid_data_loader):
+                is_stereo = len(low_res_list[0].shape) == 5 # dodgy
                 batch_split_idx = 0
                 batch_size = low_res_list[0].shape[0]
 
@@ -415,7 +424,10 @@ class Trainer(BaseTrainer):
                 self.valid_metrics.update('loss', total_loss)
                 for i, met in enumerate(self.metric_ftns):
                     self.valid_metrics.update(met.__name__, total_metrics[i])
-                self.writer.add_image('input', make_grid(low_res_list[0].cpu(), nrow=8, normalize=True))
+                img = low_res_list[0]
+                if is_stereo:
+                    img = img.permute(1,0,2,3,4)[0]
+                self.writer.add_image('input', make_grid(img.cpu(), nrow=8, normalize=True))
 
         self.logger.debug(f"Validate Epoch: {epoch} Duration: {time() - t0:.3f} seconds")
         # add histogram of model parameters to the tensorboard
