@@ -292,7 +292,7 @@ class Trainer(BaseTrainer):
             if i == 1 or self.use_prev_high_res:
                 left_prev_high_res, right_prev_high_res = target_list[i-1].to(self.device)
             else:
-                left_prev_high_res, right_prev_high_res = output.detach()
+                left_prev_high_res, right_prev_high_res = output
 
             left_output, right_output = self.model(
                 left_low_res, left_depth, left_motion, left_prev_high_res, left_prev_depth,
@@ -307,9 +307,8 @@ class Trainer(BaseTrainer):
             avg_loss += loss.item()  
 
             for i, met in enumerate(self.metric_ftns):
-                avg_metrics[i] += met(left_output, left_target) * weight / (n - 1) # average over clip
-                avg_metrics[i] += met(right_output, right_target) * weight / (n - 1) # average over clip
-                avg_metrics[i] *= 0.5 # average over stereo pair
+                avg_metrics[i] += met(left_output, left_target) * 0.5 * weight / (n - 1) # average over clip
+                avg_metrics[i] += met(right_output, right_target) * 0.5 * weight / (n - 1) # average over clip
 
             output = (left_output.detach(), right_output.detach())
         

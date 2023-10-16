@@ -1,16 +1,4 @@
 {
-    "name": "SINSS",
-    "n_gpu": 2,
-    "globals": {
-        "scale_factor": 2
-    },
-    "arch": {
-        "type": "SINSS",
-        "args": {
-            "f": 32,
-            "m": 2
-        }
-    },
     "data_loader": {
         "type": "StereoSuperSamplingDataLoader",
         "args":{
@@ -32,7 +20,8 @@
             "motion_dirname": "motion/",
             
 	        "output_dimensions": [1200, 1200],
-            "num_frames": 2
+            "num_frames": 16,
+            "drop_frames": 8
         }
     },
     "valid_data_loader": {
@@ -51,27 +40,11 @@
             "motion_dirname": "motion/",
             
 	        "output_dimensions": [1200, 1200],
-            "num_frames": 2
+            "num_frames": 16,
+            "drop_frames": 8
         }
     },
-    "optimizer": {
-        "type": "Adam",
-        "args":{
-            "lr": 0.001, 
-            "weight_decay": 0.00001,
-            "amsgrad": true
-        }
-    },
-    "metrics": [
-        "psnr","ssim"
-    ],
-    "lr_scheduler": {
-        "type": "StepLR",
-        "args": {
-            "step_size": 20,
-            "gamma": 0.5
-        }
-    },
+    
     "trainer": {
         "epochs": 100,
         "save_dir": "saved/",
@@ -83,7 +56,7 @@
             "image_verbosity": 8,
             "batch_split_size": 1,
             "method": "sinss",
-            "use_prev_high_res": true
+            "use_prev_high_res": false
         },
         "tensorboard": false
     }

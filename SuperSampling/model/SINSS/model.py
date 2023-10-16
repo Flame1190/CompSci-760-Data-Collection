@@ -24,6 +24,15 @@ class SINSS(BaseModel):
 
         self.inpainting = Inpainting()
         self.net = Network(self.shuffled_channel_count, f, m)
+
+        self.final = nn.Sequential(
+            nn.Conv2d(3, 16, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(16, 16, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(16, 3, kernel_size=3, padding=1),
+            nn.ReLU(),
+        )
         
 
     def forward(self, 
@@ -84,6 +93,11 @@ class SINSS(BaseModel):
         right_residuals, right_mask = self.net(right_current_color, right_current_depth, right_prev_color, left_warped_color)
         right_mix = right_mask * right_residuals + (1 - right_mask) * right_prev_color
         right_mix = self.depth_to_space(right_mix)
+
+
+        # uh
+        left_mix = self.final(left_mix)
+        right_mix = self.final(right_mix)
 
         return left_mix, right_mix
     
@@ -166,7 +180,16 @@ class Inpainting(BaseModel):
     def __init__(self):
         super().__init__()
         
-        self.difference_net = DoubleConv(4, 8, 3, activation=lambda : nn.Hardtanh(min_val=0, max_val=1))
+        self.difference_net = nn.Sequential(
+            nn.Conv2d(4, 16, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(16, 16, kernel_size=3, padding=1),
+            nn.ReLU(),
+            nn.Conv2d(16, 3, kernel_size=3, padding=1),
+            nn.Hardtanh(max_val=0, max_value=1),
+        )
+        
+        # DoubleConv(4, 8, 3, activation=lambda : nn.Hardtanh(min_val=0, max_val=1))
 
     def forward(self, 
                 current_color: torch.Tensor, 
