@@ -201,12 +201,12 @@ class SupersamplingDataset(Dataset):
                 height, width = self.output_dimensions # TODO: reorder, this should be width, height
                 
             # TODO: check interpolation method
-            img_view_truth = cv2.resize(img_view_truth, (height, width), cv2.INTER_CUBIC)
+            img_view_truth = cv2.resize(img_view_truth, (height, width), cv2.INTER_AREA)
 
             low_res_height, low_res_width = height // self.scale_factor, width // self.scale_factor
-            img_view_input = cv2.resize(img_view_truth, (low_res_height, low_res_width), cv2.INTER_CUBIC)
-            img_depth = cv2.resize(img_depth,  (low_res_height, low_res_width), cv2.INTER_CUBIC)
-            img_motion = cv2.resize(img_motion, (low_res_height, low_res_width), cv2.INTER_CUBIC)
+            img_view_input = cv2.resize(img_view_truth, (low_res_height, low_res_width), cv2.INTER_AREA)
+            img_depth = cv2.resize(img_depth,  (low_res_height, low_res_width), cv2.INTER_AREA)
+            img_motion = cv2.resize(img_motion, (low_res_height, low_res_width), cv2.INTER_AREA)
 
             target_image = transform(img_view_truth)
             img_view = transform(img_view_input)
