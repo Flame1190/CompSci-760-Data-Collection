@@ -2,7 +2,7 @@
     "name": "NSRR",
     "n_gpu": 1,
     "globals": {
-        "scale_factor": 4
+        "scale_factor": 3
     },
     "arch": {
         "type": "NSRR",

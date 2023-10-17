@@ -102,7 +102,7 @@ def test_sinss(config):
             target_list, 
             indices,
             unchunked_low_res,
-            _
+            unchunked_high_res
         ] in enumerate(tqdm(data_loader)):
             low_res_list = perm_for_stereo(low_res_list)
             depth_list = perm_for_stereo(depth_list)
@@ -158,11 +158,12 @@ def test_sinss(config):
             # merge patches
             merged_output = merge_image(left_output, indices, (1, 3, *output_dimensions), patch_size_hr, overlap_hr)
             left_input = unchunked_low_res[0]
+            left_truth = unchunked_high_res[0]
 
             # save result images
             toImage(left_input[0]).save(os.path.join(input_path, f"{frame_idx}.png"))
             toImage(merged_output[0]).save(os.path.join(output_path, f"{frame_idx}.png"))
-
+            toImage(left_truth[0]).save(os.path.join(truth_path, f"{frame_idx}.png"))
             t_start_load = time.time()
 
     n_samples = len(data_loader.sampler)

@@ -1,8 +1,8 @@
 {
-    "run": "sinss",
+    "run": "mnss",
     "n_gpu": 2,
     "globals": {
-        "scale_factor": 3
+        "scale_factor": 2
     },
     "data_loader": {
         "args":{
@@ -19,7 +19,7 @@
             
 	        "output_dimensions": [1200, 1200],
             "num_frames": 2,
-            "num_data": null
+            "num_data": 80
         }
     }
 }
