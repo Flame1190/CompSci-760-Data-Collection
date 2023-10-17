@@ -1,0 +1,29 @@
+{
+    "run": "sinss",
+    "n_gpu": 2,
+    "globals": {
+        "scale_factor": 2
+    },
+    "data_loader": {
+        "args":{
+            "data_dirs":  [
+                "data/BigClip/",
+                "data/Clip_4/",
+                "data/Clip_3/",
+                "data/Clip_1/",
+                "data/Clip_0/"
+            ],
+            
+            "num_workers": 4,
+            "left_dirname": "left/",
+            "right_dirname": "right/",
+            "color_dirname": "color/",
+            "depth_dirname": "depth/",
+            "motion_dirname": "motion/",
+            
+	        "output_dimensions": [1200, 1200],
+            "num_frames": 2,
+            "num_data": null
+        }
+    }
+}
