@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from base import BaseModel
-from utils import warp, retrieve_elements_from_indices, flatten
+from utils import warp,  flatten, retrieve_elements_from_indices
 
 # what if in-painting also returns a feature map?
 # just use depth for warping?
@@ -143,20 +143,32 @@ class Network(BaseModel):
         
 
 class Warping(BaseModel):
-    def __init__(self, scale_factor: int, depth_dilation_window: int = 3):
+    def __init__(self, scale_factor: int, depth_dilation_window: int = 8):
         super().__init__()
-        assert depth_dilation_window % 2 == 1
+        assert depth_dilation_window % 2 == 0
         self.scale_factor = scale_factor
-        
+        self.block_size = depth_dilation_window // scale_factor
+
+
         self.upsample = nn.Upsample(scale_factor=scale_factor, mode='bilinear')
-        self.pool = nn.MaxPool2d(kernel_size=depth_dilation_window, stride=1, padding=depth_dilation_window // 2, return_indices=True)
+        
+    def depth_informed_dilation(self, depth: torch.Tensor, motion: torch.Tensor) -> torch.Tensor:
+        B, C, H, W = depth.size()
+        assert C == 1
+        assert motion.size() == (B, 2, H, W)
+        assert H % self.block_size == 0 and W % self.block_size == 0
+
+        _, indices = F.max_pool2d_with_indices(depth, kernel_size=self.block_size, stride=self.block_size, padding=0)
+        indices = indices.repeat(1, self.block_size ** 2, 1, 1) # duplicate indices for each block
+        indices = F.pixel_shuffle(indices, self.block_size) # upsample indices to original size
+
+        return retrieve_elements_from_indices(motion, indices)
+
 
     def forward(self, prev_color, prev_depth, current_depth, current_motion):
         # Depth informed dilation
-        # Get indices of closest pixels and use those motion vectors
-        _, indices = self.pool(current_depth)
-        
-        current_motion = retrieve_elements_from_indices(current_motion, indices)
+        # Get indices of closest pixels and use those motion vectors        
+        current_motion = self.depth_informed_dilation(current_depth, current_motion)
         high_res_current_motion = self.upsample(current_motion)
 
         # Warp previous features and color
@@ -186,7 +198,7 @@ class Inpainting(BaseModel):
             nn.Conv2d(16, 16, kernel_size=3, padding=1),
             nn.ReLU(),
             nn.Conv2d(16, 3, kernel_size=3, padding=1),
-            nn.Hardtanh(max_val=0, max_value=1),
+            nn.Sigmoid(),
         )
         
         # DoubleConv(4, 8, 3, activation=lambda : nn.Hardtanh(min_val=0, max_val=1))
