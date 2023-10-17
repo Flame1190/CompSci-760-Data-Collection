@@ -1,11 +1,12 @@
 import argparse
 import torch
+import torch.nn.functional as F
 from tqdm import tqdm
 
 import data_loader.data_loaders as module_data
 import model.loss as module_loss
-import model.metric as module_metric
 import model.model as module_arch
+import model.metric as metrics
 from utils import ensure_dir
 
 from parse_config import ConfigParser
@@ -14,43 +15,158 @@ import torchvision
 import time
 import os
 
-def split_image(image: torch.Tensor, patch_size: int = 264, min_overlap: int = 12, get_indices: bool = False):
-    B, C, H, W = image.shape
-    assert B == 1, "Only batch size 1 is supported"
 
-    num_patches_h = H // patch_size + 1
-    num_patches_w = W // patch_size + 1 
+from .test_utils import merge_image, split_image, StereoRecurrentTestingDataLoader
 
-    overlap_h = (num_patches_h * patch_size - H) // (num_patches_h - 1)
-    while overlap_h < min_overlap:
-        num_patches_h += 1
-        overlap_h = (num_patches_h * patch_size - H) // (num_patches_h - 1)
+def test_sinss(config):
+    assert config['data_loader']['args']['num_frames'] == 2, "Only 2 frames for efficiency"
+    assert torch.is_grad_enabled() == False, "No gradients should be computed"
 
-    overlap_w = (num_patches_w * patch_size - W) // (num_patches_w - 1)
-    while overlap_w < min_overlap:
-        num_patches_w += 1
-        overlap_w = (num_patches_w * patch_size - W) // (num_patches_w - 1)
+    toImage = torchvision.transforms.ToPILImage()
+    logger = config.get_logger('test')
 
-    patches = torch.Tensor(num_patches_h * num_patches_w, C, patch_size, patch_size).to(image.device)
-    patch_indices = []
-    patch_starts_h = [i * (patch_size - overlap_h) for i in range(num_patches_h)]
-    patch_starts_w = [i * (patch_size - overlap_w) for i in range(num_patches_w)]
+    scale_factor = config["globals"]["scale_factor"]
+    # patch_size_hr = config["globals"]["patch_size_hr"]
+    patch_size_hr = 264
+    # overlap_hr = config["globals"]["overlap_hr"]
+    overlap_hr = 12
+    patch_size_lr = patch_size_hr // scale_factor
+    overlap_lr = overlap_hr // scale_factor
 
-    for i, p_h in enumerate(patch_starts_h):
-        for j, p_w in enumerate(patch_starts_w):
-            patch = image[:, :, p_h:p_h + patch_size, p_w:p_w + patch_size]
-            patches[i * num_patches_w + j] = patch
-            get_indices and patch_indices.append((p_h, p_w))
+    output_dimensions = config["data_loader"]["args"]["output_dimensions"]
+    assert output_dimensions is not None, "Sorry mate, you need to specify output dimensions since I won't fix my code"
 
-    return patches, patch_indices
+    # ensure results directories exist
+    input_path = os.path.join("test_results", "input")
+    output_path = os.path.join("test_results", "output")
+    truth_path = os.path.join("test_results", "truth")
 
-def merge_image(patches: torch.Tensor, patch_indices: list[tuple[int,int]], image_size: tuple, patch_size: int, overlap: int):
-    image = torch.zeros(image_size)
+    ensure_dir(input_path)
+    ensure_dir(output_path)
+    ensure_dir(truth_path)
 
-    for i, (p_h, p_w) in enumerate(patch_indices):
-        image[0,:,p_h + overlap // 2 :p_h + patch_size, p_w + overlap // 2:p_w + patch_size] = patches[i, :, overlap // 2:, overlap // 2:]
+    # setup data_loader instances
+    data_loader = StereoRecurrentTestingDataLoader(
+        config['data_loader']['args']['data_dirs'],
+        left_dirname=config['data_loader']['args']['left_dirname'],
+        right_dirname=config['data_loader']['args']['right_dirname'],
+        color_dirname=config['data_loader']['args']['color_dirname'],
+        depth_dirname=config['data_loader']['args']['depth_dirname'],
+        motion_dirname=config['data_loader']['args']['motion_dirname'],
 
-    return image
+        num_workers=4,
+
+        scale_factor=scale_factor,
+        patch_size_hr=patch_size_hr,
+        overlap_hr=overlap_hr,
+
+        output_dimensions=output_dimensions,
+        num_data=config["data_loader"]["args"]["num_data"]
+    )
+
+    # build model architecture
+    model = config.init_obj('arch', module_arch, scale_factor=scale_factor)
+    logger.info(model)
+
+    # init model weights from checkpoint
+    logger.info('Loading checkpoint: {} ...'.format(config.resume))
+    checkpoint = torch.load(config.resume)
+    state_dict = checkpoint['state_dict']
+    if config['n_gpu'] > 1:
+        model = torch.nn.DataParallel(model)
+    model.load_state_dict(state_dict)
+
+    # prepare model for testing
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = model.to(device)
+    model.eval()
+
+    # test
+    compute_metrics = True
+    total_metrics = torch.zeros(2 + 2 + 1)
+    total_time = 0.0
+    data_time = 0.0
+
+    indices = None
+    left_prev_high_res, right_prev_high_res = None, None
+    with torch.no_grad(): 
+        t_start_load = time()
+
+        for frame_idx, [
+            low_res_list, 
+            depth_list, 
+            motion_vector_list, 
+            target_list, 
+            indices,
+            unchunked_low_res,
+            _
+        ] in enumerate(tqdm(data_loader)):
+            data_time += time() - t_start_load
+
+            left_low_res, right_low_res = low_res_list[1].to(device)
+            left_depth, right_depth = depth_list[1].to(device)
+            left_prev_depth, right_prev_depth = depth_list[0].to(device)
+            left_motion, right_motion = motion_vector_list[1].to(device)
+            left_target, right_target = target_list[1].to(device)
+
+            # dimensions are static so indices are the same for all frames
+            if frame_idx == 0:
+                left_prev_high_res, right_prev_high_res = target_list[0].to(device)
+
+            start = time.time()
+            left_output, right_output = model(
+                left_low_res, left_depth, left_motion, left_prev_high_res, left_prev_depth,
+                right_low_res, right_depth, right_motion, right_prev_high_res, right_prev_depth
+            )
+            total_time += time.time() - start
+
+            # metrics
+            if compute_metrics:
+                # computing loss, metrics on test set
+                left_output = left_output.cpu().detach()
+                right_output = right_output.cpu().detach()
+                
+                left_target = left_target.cpu().detach()
+                right_target = right_target.cpu().detach()
+
+                
+                total_metrics[0] += metrics.psnr(left_output, left_target) 
+                total_metrics[1] += metrics.psnr(right_output, right_target)
+
+                total_metrics[2] += metrics.ssim(left_output, left_target) 
+                total_metrics[3] += metrics.ssim(right_output, right_target)
+
+                total_metrics[4] += metrics.wsdr(
+                    left_output, 
+                    right_output, 
+                    left_target, 
+                    right_target, 
+                    F.upsample(left_depth, scale_factor=scale_factor), 
+                    warping_coeff=0.1845
+                    )
+
+            # merge patches
+            merged_output = merge_image(left_output, indices, (1, 3, *output_dimensions), patch_size_hr, overlap_hr)
+            left_input, = unchunked_low_res
+
+            # save result images
+            toImage(left_input[0]).save(os.path.join(input_path, f"{frame_idx}.png"))
+            toImage(merged_output[0]).save(os.path.join(output_path, f"{frame_idx}.png"))
+
+            t_start_load = time()
+
+    n_samples = len(data_loader.sampler)
+    log = {
+        "left_psnr": total_metrics[0].item() / n_samples,
+        "right_psnr": total_metrics[1].item() / n_samples,
+        "left_ssim": total_metrics[2].item() / n_samples,
+        "right_ssim": total_metrics[3].item() / n_samples,
+        "wsdr": total_metrics[4].item() / n_samples,
+    }
+    logger.info(log)
+    print(f"runtime: {1000 * total_time / n_samples} ms per frame")
+
+
 
 def test_inss(
         data_loader,
@@ -74,8 +190,6 @@ def test_inss(
     ensure_dir(input_path)
     ensure_dir(output_path)
     ensure_dir(truth_path)
-
-
 
     scale_factor = config['globals']['scale_factor']
 
@@ -134,62 +248,68 @@ def test_inss(
 
     return (total_loss, total_metrics, total_time)
 
+# def main(config):
+#     toImage = torchvision.transforms.ToPILImage()
+
+#     logger = config.get_logger('test')
+#     scale_factor = config["globals"]["scale_factor"]
+
+#     # setup data_loader instances
+#     data_loader = getattr(module_data, config['data_loader']['type'])(
+#         config['data_loader']['args']['data_dirs'],
+#         color_dirname="color/",
+#         depth_dirname="depth/",
+#         motion_dirname="motion/",
+#         batch_size=1 ,
+#         shuffle=False,
+#         num_workers=4,
+#         num_frames=config['data_loader']['args']['num_frames'],
+#         scale_factor=scale_factor,
+#         output_dimensions=config['data_loader']['args']['output_dimensions'],
+#         # num_data=config["data_loader"]["args"]["num_data"]
+#     )
+
+#     # build model architecture
+#     model = config.init_obj('arch', module_arch, scale_factor=scale_factor)
+#     logger.info(model)
+
+#     # get function handles of loss and metrics
+#     # loss_fn = getattr(module_loss, config['loss'])
+#     loss_fn = lambda a, b: 0
+#     metric_fns = [getattr(module_metric, met) for met in config['metrics']]
+
+#     logger.info('Loading checkpoint: {} ...'.format(config.resume))
+#     checkpoint = torch.load(config.resume)
+#     state_dict = checkpoint['state_dict']
+#     if config['n_gpu'] > 1:
+#         model = torch.nn.DataParallel(model)
+#     model.load_state_dict(state_dict)
+
+#     # prepare model for testing
+#     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+#     model = model.to(device)
+#     model.eval()
+
+#     total_loss = 0.0
+#     total_metrics = torch.zeros(len(metric_fns))
+#     total_time = 0.0
+
+#     with torch.no_grad():
+#         total_loss, total_metrics, total_time = test_inss(data_loader, model, loss_fn, metric_fns, device, config)
+
+#     n_samples = len(data_loader.sampler)
+#     log = {'loss': total_loss / n_samples}
+#     log.update({
+#         met.__name__: total_metrics[i].item() / n_samples for i, met in enumerate(metric_fns)
+#     })
+#     logger.info(log)
+    # print(f"runtime: {1000 * total_time / n_samples} ms per frame")
+
 def main(config):
-    toImage = torchvision.transforms.ToPILImage()
+    if config["run"] == "sinss":
+        test_sinss(config)
 
-    logger = config.get_logger('test')
-    scale_factor = config["globals"]["scale_factor"]
-
-    # setup data_loader instances
-    data_loader = getattr(module_data, config['data_loader']['type'])(
-        config['data_loader']['args']['data_dirs'],
-        color_dirname="color/",
-        depth_dirname="depth/",
-        motion_dirname="motion/",
-        batch_size=1 ,
-        shuffle=False,
-        num_workers=4,
-        num_frames=config['data_loader']['args']['num_frames'],
-        scale_factor=scale_factor,
-        output_dimensions=config['data_loader']['args']['output_dimensions'],
-        # num_data=config["data_loader"]["args"]["num_data"]
-    )
-
-    # build model architecture
-    model = config.init_obj('arch', module_arch, scale_factor=scale_factor)
-    logger.info(model)
-
-    # get function handles of loss and metrics
-    # loss_fn = getattr(module_loss, config['loss'])
-    loss_fn = lambda a, b: 0
-    metric_fns = [getattr(module_metric, met) for met in config['metrics']]
-
-    logger.info('Loading checkpoint: {} ...'.format(config.resume))
-    checkpoint = torch.load(config.resume)
-    state_dict = checkpoint['state_dict']
-    if config['n_gpu'] > 1:
-        model = torch.nn.DataParallel(model)
-    model.load_state_dict(state_dict)
-
-    # prepare model for testing
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = model.to(device)
-    model.eval()
-
-    total_loss = 0.0
-    total_metrics = torch.zeros(len(metric_fns))
-    total_time = 0.0
-
-    with torch.no_grad():
-        total_loss, total_metrics, total_time = test_inss(data_loader, model, loss_fn, metric_fns, device, config)
-
-    n_samples = len(data_loader.sampler)
-    log = {'loss': total_loss / n_samples}
-    log.update({
-        met.__name__: total_metrics[i].item() / n_samples for i, met in enumerate(metric_fns)
-    })
-    logger.info(log)
-    print(f"runtime: {1000 * total_time / n_samples} ms per frame")
+    raise NotImplementedError("Only sinss is supported")
 
 
 if __name__ == '__main__':
