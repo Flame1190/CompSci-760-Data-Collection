@@ -38,7 +38,7 @@ def split_image(image: torch.Tensor, patch_size: int = 264, min_overlap: int = 1
 
 def merge_image(patches: torch.Tensor, patch_indices: list[tuple[int,int]], image_size: tuple, patch_size: int, overlap: int):
     image = torch.zeros(image_size)
-
+    
     for i, (p_h, p_w) in enumerate(patch_indices):
         image[0,:,p_h + overlap // 2 :p_h + patch_size, p_w + overlap // 2:p_w + patch_size] = patches[i, :, overlap // 2:, overlap // 2:]
 
@@ -63,7 +63,7 @@ class StereoRecurrentTestingDataLoader(BaseDataLoader):
                  ):
         reverse: bool = True,
         num_frames = 2
-        batch_size = 1,
+        batch_size = 1
 
         left_data_dirs = [os.path.join(data_dir, left_dirname) for data_dir in data_dirs]
         right_data_dirs = [os.path.join(data_dir, right_dirname) for data_dir in data_dirs]
@@ -140,21 +140,37 @@ class ChunkedDataset(Dataset):
 
 
     def __getitem__(self, index):
+        add_batch_dim = lambda x: torch.unsqueeze(x, 0)
+        remove_batch_dim = lambda x: x[0]
+
         views, depths, motions, truths = self.dataset[index]
-        
+        assert len(views) == 2
+
         unchunked_view = views[1]
         unchunked_truth = truths[1]
+
+        views = map(add_batch_dim, views)
+        depths = map(add_batch_dim, depths)
+        motions = map(add_batch_dim, motions)
+        truths = map(add_batch_dim, truths)
+
 
         views = [split_image(view, self.patch_size_lr, self.overlap_lr)[0] for view in views]
         depths = [split_image(depth, self.patch_size_lr, self.overlap_lr)[0] for depth in depths]
         motions = [split_image(motion, self.patch_size_lr, self.overlap_lr)[0] for motion in motions]
-        truths = [split_image(truth, self.patch_size_hr, self.overlap_hr) for truth in truths]
-        truths, indices = zip(*truths)
+        truths = [split_image(truth, self.patch_size_hr, self.overlap_hr, True) for truth in truths]
+        indices = truths[1][1]     
+        truths = [truth for truth, _ in truths]
+
+        # views = list(map(remove_batch_dim, views))
+        # depths = list(map(remove_batch_dim, depths))
+        # motions = list(map(remove_batch_dim, motions))
+        # truths = list(map(remove_batch_dim, truths))
 
         return views, depths, motions, truths, indices, unchunked_view, unchunked_truth
 
     def __len__(self) -> int:
-        return len(self.left_dataset), len(self.right_dataset)
+        return len(self.dataset)
     
 class ChunkedStereoDataset:
     def __init__(self, 

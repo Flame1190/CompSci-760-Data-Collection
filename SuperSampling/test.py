@@ -16,11 +16,10 @@ import time
 import os
 
 
-from .test_utils import merge_image, split_image, StereoRecurrentTestingDataLoader
+from test_utils import merge_image, split_image, StereoRecurrentTestingDataLoader
 
 def test_sinss(config):
     assert config['data_loader']['args']['num_frames'] == 2, "Only 2 frames for efficiency"
-    assert torch.is_grad_enabled() == False, "No gradients should be computed"
 
     toImage = torchvision.transforms.ToPILImage()
     logger = config.get_logger('test')
@@ -89,8 +88,11 @@ def test_sinss(config):
 
     indices = None
     left_prev_high_res, right_prev_high_res = None, None
+
+    perm_for_stereo = lambda res_list: [tensor.squeeze(0) for tensor in res_list]
     with torch.no_grad(): 
-        t_start_load = time()
+        assert torch.is_grad_enabled() == False, "No gradients should be computed"
+        t_start_load = time.time()
 
         for frame_idx, [
             low_res_list, 
@@ -101,7 +103,12 @@ def test_sinss(config):
             unchunked_low_res,
             _
         ] in enumerate(tqdm(data_loader)):
-            data_time += time() - t_start_load
+            low_res_list = perm_for_stereo(low_res_list)
+            depth_list = perm_for_stereo(depth_list)
+            motion_vector_list = perm_for_stereo(motion_vector_list)
+            target_list = perm_for_stereo(target_list)
+
+            data_time += time.time() - t_start_load
 
             left_low_res, right_low_res = low_res_list[1].to(device)
             left_depth, right_depth = depth_list[1].to(device)
@@ -112,13 +119,15 @@ def test_sinss(config):
             # dimensions are static so indices are the same for all frames
             if frame_idx == 0:
                 left_prev_high_res, right_prev_high_res = target_list[0].to(device)
-
+                
             start = time.time()
             left_output, right_output = model(
                 left_low_res, left_depth, left_motion, left_prev_high_res, left_prev_depth,
                 right_low_res, right_depth, right_motion, right_prev_high_res, right_prev_depth
             )
-            total_time += time.time() - start
+            # first one takes much longer due to lazy init i assume
+            if frame_idx >= 1:
+                total_time += (time.time() - start)
 
             # metrics
             if compute_metrics:
@@ -141,19 +150,19 @@ def test_sinss(config):
                     right_output, 
                     left_target, 
                     right_target, 
-                    F.upsample(left_depth, scale_factor=scale_factor), 
+                    F.upsample(left_depth, scale_factor=scale_factor).cpu(), 
                     warping_coeff=0.1845
                     )
 
             # merge patches
             merged_output = merge_image(left_output, indices, (1, 3, *output_dimensions), patch_size_hr, overlap_hr)
-            left_input, = unchunked_low_res
+            left_input = unchunked_low_res[0]
 
             # save result images
             toImage(left_input[0]).save(os.path.join(input_path, f"{frame_idx}.png"))
             toImage(merged_output[0]).save(os.path.join(output_path, f"{frame_idx}.png"))
 
-            t_start_load = time()
+            t_start_load = time.time()
 
     n_samples = len(data_loader.sampler)
     log = {
@@ -164,7 +173,7 @@ def test_sinss(config):
         "wsdr": total_metrics[4].item() / n_samples,
     }
     logger.info(log)
-    print(f"runtime: {1000 * total_time / n_samples} ms per frame")
+    print(f"runtime: {1000 * total_time / (n_samples - 1)} ms per frame")
 
 
 
@@ -308,8 +317,8 @@ def test_inss(
 def main(config):
     if config["run"] == "sinss":
         test_sinss(config)
-
-    raise NotImplementedError("Only sinss is supported")
+    else:
+        raise NotImplementedError("Only sinss is supported")
 
 
 if __name__ == '__main__':

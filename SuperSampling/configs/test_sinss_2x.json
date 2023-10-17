@@ -7,11 +7,7 @@
     "data_loader": {
         "args":{
             "data_dirs":  [
-                "data/BigClip/",
-                "data/Clip_4/",
-                "data/Clip_3/",
-                "data/Clip_1/",
-                "data/Clip_0/"
+                "data/TestClip/"
             ],
             
             "num_workers": 4,
