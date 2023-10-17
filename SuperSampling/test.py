@@ -474,6 +474,8 @@ def test_inss(
 def main(config):
     if config["run"] == "sinss":
         test_sinss(config)
+    elif config["run"] == "mnss":
+        test_mnss(config)
     else:
         raise NotImplementedError("Only sinss is supported")
 
