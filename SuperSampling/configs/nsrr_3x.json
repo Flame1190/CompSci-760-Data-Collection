@@ -1,5 +1,5 @@
 {
-    "name": "NSRR",
+    "name": "NSRR_3X",
     "n_gpu": 1,
     "globals": {
         "scale_factor": 3
@@ -24,7 +24,7 @@
             "batch_size": 8,
             "shuffle": true,
             
-            "num_workers": 4,
+            "num_workers": 8,
             "color_dirname": "color/",
             "depth_dirname": "depth/",
             "motion_dirname": "motion/",
@@ -43,7 +43,7 @@
             "batch_size": 8,
             "shuffle": true,
             
-            "num_workers": 4,
+            "num_workers": 8,
             "color_dirname": "color/",
             "depth_dirname": "depth/",
             "motion_dirname": "motion/",
@@ -79,6 +79,7 @@
         "monitor": "min val_loss",
         "early_stop": 10,
         "args": {
+            "image_verbosity": 8,
             "batch_split_size": 1,
             "method": "nsrr"
             
