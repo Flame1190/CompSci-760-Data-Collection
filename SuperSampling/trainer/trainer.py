@@ -137,6 +137,20 @@ class Trainer(BaseTrainer):
             self.lr_scheduler.step()
         return log
     
+    def get_patching_transforms(self, cur_size_hr: int, new_size_hr: int):
+        # create a random 264 x 264 patch at the target resolution
+        # patch_size_HR = 528
+        new_size_lr = new_size_hr // self.scale_factor
+        
+        idx_h = np.random.randint(0, cur_size_hr - new_size_hr)
+        idx_w = np.random.randint(0, cur_size_hr - new_size_hr)
+        get_target_patch_high_res = lambda x : x[:, :, idx_h:idx_h+new_size_hr, idx_w:idx_w+new_size_hr]
+        
+        idx_h = idx_h // self.scale_factor
+        idx_w = idx_w // self.scale_factor
+        get_target_patch_low_res = lambda x : x[:, :, idx_h:idx_h+new_size_lr, idx_w:idx_w+new_size_lr]
+        return get_target_patch_high_res, get_target_patch_low_res
+
     def init_nsrr(self):
         """
         Initialize trainer for Neural Supersampling for Real-time Rendering
@@ -150,6 +164,13 @@ class Trainer(BaseTrainer):
         Training logic for one batch / sub batch  Neural Supersampling for Real-time Rendering
 
         """
+        _, _, H, W = target_list[0].shape
+        assert H == W
+        transform_hr, transform_lr = self.get_patching_transforms(H, 900)
+        target_list = [transform_hr(target) for target in target_list[:1]]
+        low_res_list = [transform_lr(low_res) for low_res in low_res_list]
+        depth_list = [transform_lr(depth) for depth in depth_list]
+        motion_vector_list = [transform_lr(motion_vector) for motion_vector in motion_vector_list]
 
         target = target_list[0].to(self.device)
         depth_list = [depth.to(self.device) for depth in depth_list]
