@@ -9,10 +9,11 @@ import model.model as module_arch
 from parse_config import ConfigParser
 from trainer import Trainer
 from utils import prepare_device
-
+import random
 
 # fix random seeds for reproducibility
 SEED = 123
+random.seed(SEED)
 torch.manual_seed(SEED)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False

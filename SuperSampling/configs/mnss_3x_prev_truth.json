@@ -2,7 +2,7 @@
     "name": "MNSS",
     "n_gpu": 2,
     "globals": {
-        "scale_factor": 2
+        "scale_factor": 3
     },
     "arch": {
         "type": "MNSS",

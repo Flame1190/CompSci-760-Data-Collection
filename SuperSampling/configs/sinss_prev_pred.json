@@ -1,20 +1,20 @@
 {
-    "name": "INSS",
-    "n_gpu": 2,
     "data_loader": {
-        "type": "SupersamplingDataLoader",
+        "type": "StereoSuperSamplingDataLoader",
         "args":{
             "data_dirs":  [
-                "data/spaceship_clip_2_left",
-                "data/Clip_4/left",
-                "data/Clip_3/left",
-                "data/Clip_2/left",
-                "data/Clip_1/left"
+                "data/BigClip/",
+                "data/Clip_4/",
+                "data/Clip_3/",
+                "data/Clip_1/",
+                "data/Clip_0/"
             ],
-            "batch_size": 8,
+            "batch_size": 4,
             "shuffle": true,
             
-            "num_workers": 2,
+            "num_workers": 4,
+            "left_dirname": "left/",
+            "right_dirname": "right/",
             "color_dirname": "color/",
             "depth_dirname": "depth/",
             "motion_dirname": "motion/",
@@ -25,15 +25,16 @@
         }
     },
     "valid_data_loader": {
-        "type": "SupersamplingDataLoader",
+        "type": "StereoSuperSamplingDataLoader",
         "args":{
             "data_dirs": [
-                "data/Clip_0/left"
+                "data/Clip_2/"
             ],
-            "batch_size": 8,
+            "batch_size": 4,
             "shuffle": true,
-            
-            "num_workers": 2,
+            "num_workers": 4,
+            "left_dirname": "left/",
+            "right_dirname": "right/",
             "color_dirname": "color/",
             "depth_dirname": "depth/",
             "motion_dirname": "motion/",
@@ -43,17 +44,18 @@
             "drop_frames": 8
         }
     },
+    
     "trainer": {
         "epochs": 100,
         "save_dir": "saved/",
-        "save_period": 2,
+        "save_period": 1,
         "verbosity": 2,
         "monitor": "min val_loss",
         "early_stop": 10,
         "args": {
             "image_verbosity": 8,
-            "batch_split_size": 2,
-            "method": "inss",
+            "batch_split_size": 1,
+            "method": "sinss",
             "use_prev_high_res": false
         },
         "tensorboard": false

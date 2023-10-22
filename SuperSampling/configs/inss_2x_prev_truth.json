@@ -14,11 +14,17 @@
     "data_loader": {
         "type": "SupersamplingDataLoader",
         "args":{
-            "data_dirs": "data/spaceship_clip_2_left",
-            "batch_size": 4,
+            "data_dirs":  [
+                "data/spaceship_clip_2_left",
+                "data/Clip_4/left",
+                "data/Clip_3/left",
+                "data/Clip_2/left",
+                "data/Clip_1/left"
+            ],
+            "batch_size": 8,
             "shuffle": true,
             
-            "num_workers": 2,
+            "num_workers": 4,
             "color_dirname": "color/",
             "depth_dirname": "depth/",
             "motion_dirname": "motion/",
@@ -30,12 +36,12 @@
     "valid_data_loader": {
         "type": "SupersamplingDataLoader",
         "args":{
-            "data_dirs": "data/spaceship_clip_2_left",
+            "data_dirs": [
+                "data/Clip_0/left"
+            ],
             "batch_size": 8,
             "shuffle": true,
-            
-            "num_data": 60,
-            "num_workers": 2,
+            "num_workers": 4,
             "color_dirname": "color/",
             "depth_dirname": "depth/",
             "motion_dirname": "motion/",
@@ -58,8 +64,8 @@
     "lr_scheduler": {
         "type": "StepLR",
         "args": {
-            "step_size": 50,
-            "gamma": 0.1
+            "step_size": 10,
+            "gamma": 0.5
         }
     },
     "trainer": {
@@ -70,6 +76,7 @@
         "monitor": "min val_loss",
         "early_stop": 10,
         "args": {
+            "image_verbosity": 8,
             "batch_split_size": 2,
             "method": "inss",
             "use_prev_high_res": true

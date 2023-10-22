@@ -1,0 +1,20 @@
+{
+    "data_loader": {
+    "type": "SupersamplingDataLoader",
+    "args":{
+        "data_dirs":  [
+            "data/Clip_0/left"
+        ],
+        "batch_size": 1,
+        "shuffle": false,
+        
+        "num_workers": 4,
+        "color_dirname": "color/",
+        "depth_dirname": "depth/",
+        "motion_dirname": "motion/",
+        
+        "output_dimensions": [1200, 1200],
+        "num_frames": 2
+    }
+    }
+}

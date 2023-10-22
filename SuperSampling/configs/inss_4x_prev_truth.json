@@ -1,29 +1,30 @@
 {
-    "name": "MNSS",
+    "name": "INSS",
     "n_gpu": 2,
     "globals": {
-        "scale_factor": 2
+        "scale_factor": 4
     },
     "arch": {
-        "type": "MNSS",
+        "type": "INSS",
         "args": {
-            
+            "f": 64,
+            "m": 3
         }
     },
     "data_loader": {
         "type": "SupersamplingDataLoader",
         "args":{
             "data_dirs":  [
-                "data/BigClip/left",
+                "data/spaceship_clip_2_left",
                 "data/Clip_4/left",
-                "data/Clip_3/right",
-                "data/Clip_1/right",
-                "data/Clip_0/right"
+                "data/Clip_3/left",
+                "data/Clip_2/left",
+                "data/Clip_1/left"
             ],
             "batch_size": 8,
             "shuffle": true,
             
-            "num_workers": 2,
+            "num_workers": 4,
             "color_dirname": "color/",
             "depth_dirname": "depth/",
             "motion_dirname": "motion/",
@@ -36,12 +37,12 @@
         "type": "SupersamplingDataLoader",
         "args":{
             "data_dirs": [
-                "data/Clip_2/left"
+                "data/Clip_0/left"
             ],
             "batch_size": 8,
             "shuffle": true,
             
-            "num_workers": 2,
+            "num_workers": 4,
             "color_dirname": "color/",
             "depth_dirname": "depth/",
             "motion_dirname": "motion/",
@@ -64,8 +65,8 @@
     "lr_scheduler": {
         "type": "StepLR",
         "args": {
-            "step_size": 50,
-            "gamma": 0.1
+            "step_size": 10,
+            "gamma": 0.5
         }
     },
     "trainer": {
@@ -78,7 +79,7 @@
         "args": {
             "image_verbosity": 8,
             "batch_split_size": 2,
-            "method": "mnss",
+            "method": "inss",
             "use_prev_high_res": true
         },
         "tensorboard": false

@@ -1,0 +1,25 @@
+{
+    "name": "NSRR_2X_TEST",
+    "run": "nsrr",
+    "n_gpu": 2,
+    "globals": {
+        "scale_factor": 2
+    },
+    "data_loader": {
+        "args":{
+            "data_dirs":  [
+                "data/TestClip/"
+            ],
+            
+            "num_workers": 4,
+            "left_dirname": "left/",
+            "right_dirname": "right/",
+            "color_dirname": "color/",
+            "depth_dirname": "depth/",
+            "motion_dirname": "motion/",
+            
+	        "output_dimensions": [1200, 1200],
+            "num_data": null
+        }
+    }
+}

@@ -60,27 +60,27 @@ class Network(BaseModel):
             1, # depth current
             self.shuffled_channel_count # color prev shuffled
         ))
-        out_channels = sum((
-            shuffled_channel_count, # residuals
-            shuffled_channel_count  # blending mask
-        ))
+        # out_channels = sum((
+        #     shuffled_channel_count, # residuals
+        #     shuffled_channel_count  # blending mask
+        # ))
 
         self.net = nn.Sequential(
             nn.Conv2d(in_channels, f, kernel_size=3, padding=1),
             nn.ReLU(),
             *flatten(
                 [[nn.Conv2d(f, f, kernel_size=3, padding=1), nn.ReLU()] for _ in range(m)]),
-            nn.Conv2d(f, out_channels, kernel_size=3, padding=1),
+            nn.Conv2d(f, f, kernel_size=3, padding=1),
             nn.ReLU()
         )
 
         self.residual_conv = nn.Sequential(
-            nn.Conv2d(shuffled_channel_count, shuffled_channel_count, kernel_size=3, padding=1),
+            nn.Conv2d(f, shuffled_channel_count, kernel_size=3, padding=1),
             nn.ReLU(),
         )
 
         self.mask_conv = nn.Sequential(
-            nn.Conv2d(shuffled_channel_count, shuffled_channel_count, kernel_size=3, padding=1),
+            nn.Conv2d(f, shuffled_channel_count, kernel_size=3, padding=1),
             nn.Sigmoid(), # maybe hard-tanh?
         )
 
@@ -88,9 +88,9 @@ class Network(BaseModel):
         x = torch.cat([current_color, current_depth, warped_color], dim=1)
         x = self.net(x)
 
-        residuals, mask = x[:, :self.shuffled_channel_count], x[:, self.shuffled_channel_count:]
-        residuals = self.residual_conv(residuals)
-        mask = self.mask_conv(mask)
+        # residuals, mask = x[:, :self.shuffled_channel_count], x[:, self.shuffled_channel_count:]
+        residuals = self.residual_conv(x)
+        mask = self.mask_conv(x)
 
         return residuals, mask
         

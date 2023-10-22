@@ -1,13 +1,14 @@
 {
-    "name": "MNSS",
-    "n_gpu": 2,
+    "name": "NSRR_3X",
+    "n_gpu": 1,
     "globals": {
-        "scale_factor": 2
+        "scale_factor": 3
     },
     "arch": {
-        "type": "MNSS",
+        "type": "NSRR",
         "args": {
-            
+            "num_frames": 5,
+            "use_ycbcr": false
         }
     },
     "data_loader": {
@@ -23,37 +24,39 @@
             "batch_size": 8,
             "shuffle": true,
             
-            "num_workers": 2,
+            "num_workers": 8,
             "color_dirname": "color/",
             "depth_dirname": "depth/",
             "motion_dirname": "motion/",
             
 	        "output_dimensions": [1200, 1200],
-            "num_frames": 2
+            "num_frames": 5,
+            "reverse": false
         }
     },
     "valid_data_loader": {
         "type": "SupersamplingDataLoader",
         "args":{
-            "data_dirs": [
-                "data/Clip_2/left"
+            "data_dirs":  [
+                "data/Clip_2/right"
             ],
             "batch_size": 8,
             "shuffle": true,
             
-            "num_workers": 2,
+            "num_workers": 8,
             "color_dirname": "color/",
             "depth_dirname": "depth/",
             "motion_dirname": "motion/",
             
 	        "output_dimensions": [1200, 1200],
-            "num_frames": 2
+            "num_frames": 5,
+            "reverse": false
         }
     },
     "optimizer": {
         "type": "Adam",
         "args":{
-            "lr": 0.001, 
+            "lr": 0.0001, 
             "weight_decay": 0.00001,
             "amsgrad": true
         }
@@ -71,15 +74,15 @@
     "trainer": {
         "epochs": 100,
         "save_dir": "saved/",
-        "save_period": 2,
+        "save_period": 5,
         "verbosity": 2,
         "monitor": "min val_loss",
         "early_stop": 10,
         "args": {
             "image_verbosity": 8,
-            "batch_split_size": 2,
-            "method": "mnss",
-            "use_prev_high_res": true
+            "batch_split_size": 1,
+            "method": "nsrr"
+            
         },
         "tensorboard": false
     }

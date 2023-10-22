@@ -36,7 +36,8 @@ class SupersamplingDataLoader(BaseDataLoader):
                  num_workers: int = 1,
                  num_data: Union[int, None] = None,
                  output_dimensions: Union[int, None] = None,
-                 drop_frames: int | None = None
+                 drop_frames: int | None = None,
+                 reverse: bool  = True
                  ):
         self.dataset = SupersamplingDataset(data_dirs=data_dirs,
                               color_dirname=color_dirname,
@@ -47,7 +48,8 @@ class SupersamplingDataLoader(BaseDataLoader):
                               output_dimensions=output_dimensions,
                               num_frames=num_frames,
                               shuffle=shuffle,
-                              drop_frames=drop_frames
+                              drop_frames=drop_frames,
+                              reverse=reverse
                               )
         super().__init__(dataset=self.dataset,
                          batch_size=batch_size,
@@ -56,6 +58,59 @@ class SupersamplingDataLoader(BaseDataLoader):
                          num_workers=num_workers,
                          )
 
+class StereoSuperSamplingDataLoader(BaseDataLoader):
+    def __init__(self,
+                 data_dirs: str,
+                 left_dirname: str,
+                 right_dirname: str, 
+                 color_dirname: str,
+                 depth_dirname: str,
+                 motion_dirname: str,
+                 batch_size: int,
+                 scale_factor: int,
+                 num_frames: int,
+                 shuffle: bool = True,
+                 num_workers: int = 1,
+                 num_data: Union[int, None] = None,
+                 output_dimensions: Union[int, None] = None,
+                 drop_frames: int | None = None,
+                 reverse: bool  = True
+                 ):
+        left_data_dirs = [os.path.join(data_dir, left_dirname) for data_dir in data_dirs]
+        right_data_dirs = [os.path.join(data_dir, right_dirname) for data_dir in data_dirs]
+
+        self.left_dataset = SupersamplingDataset(data_dirs=left_data_dirs,
+                              color_dirname=color_dirname,
+                              depth_dirname=depth_dirname,
+                              motion_dirname=motion_dirname,
+                              scale_factor=scale_factor,
+                              num_data=num_data,
+                              output_dimensions=output_dimensions,
+                              num_frames=num_frames,
+                              shuffle=False,
+                              drop_frames=drop_frames,
+                              reverse=reverse
+                              )
+        self.right_dataset = SupersamplingDataset(data_dirs=right_data_dirs,
+                              color_dirname=color_dirname,
+                              depth_dirname=depth_dirname,
+                              motion_dirname=motion_dirname,
+                              scale_factor=scale_factor,
+                              num_data=num_data,
+                              output_dimensions=output_dimensions,
+                              num_frames=num_frames,
+                              shuffle=False,
+                              drop_frames=drop_frames,
+                              reverse=reverse
+                              )
+        self.dataset = StereoSupersamplingDataset(left_dataset=self.left_dataset, right_dataset=self.right_dataset)
+
+        super().__init__(dataset=self.dataset,
+                         batch_size=batch_size,
+                         shuffle=shuffle,
+                         validation_split=0, # read doc string note
+                         num_workers=num_workers,
+                         )
 class SupersamplingDataset(Dataset):
     """
     Requires that corresponding view, depth and motion frames share the same name.
@@ -70,7 +125,8 @@ class SupersamplingDataset(Dataset):
                  shuffle: bool,
                  output_dimensions: None | Tuple[int, int] = None,
                  num_data: Union[int, None] = None,
-                 drop_frames: int | None = None
+                 drop_frames: int | None = None,
+                 reverse: bool = True
                  ):
         super().__init__()
 
@@ -97,6 +153,7 @@ class SupersamplingDataset(Dataset):
         self.data_list = []
         # maintain a buffer for the last num_frames frames
         img_name_buffer = deque(maxlen=num_frames) 
+        step = -1 if reverse else 1
 
         for clip_dir in self.clips.keys():
             clip = self.clips[clip_dir]
@@ -104,7 +161,7 @@ class SupersamplingDataset(Dataset):
                 
                 img_name_buffer.appendleft(img_name)
                 if len(img_name_buffer) == num_frames:
-                    self.data_list.append((clip_dir, list(img_name_buffer)))
+                    self.data_list.append((clip_dir, list(img_name_buffer)[::step]))
 
                     if drop_frames is not None:
                         for _ in range(drop_frames):
@@ -117,7 +174,6 @@ class SupersamplingDataset(Dataset):
             self.data_list = random.sample(self.data_list, min(len(self.data_list), num_data))
         else:
             self.data_list = self.data_list[:num_data]
-
     
     def __getitem__(self, index):
         clip_dir, data = self.data_list[index]
@@ -126,6 +182,7 @@ class SupersamplingDataset(Dataset):
             tf.Lambda(lambda x: x[[2,1,0]]), # BGR to RGB (for cv2)
         ])
 
+        # print(data)
         view_list, depth_list, motion_list, truth_list = [], [], [], []
         # elements in the lists following the order: current frame i, pre i-1, pre i-2, pre i-3, pre i-4
         for frame in data:
@@ -143,13 +200,12 @@ class SupersamplingDataset(Dataset):
             if self.output_dimensions is not None:
                 height, width = self.output_dimensions # TODO: reorder, this should be width, height
                 
-            # TODO: check interpolation method
-            img_view_truth = cv2.resize(img_view_truth, (height, width), cv2.INTER_NEAREST)
-
             low_res_height, low_res_width = height // self.scale_factor, width // self.scale_factor
-            img_view_input = cv2.resize(img_view_truth, (low_res_height, low_res_width), cv2.INTER_NEAREST)
-            img_depth = cv2.resize(img_depth,  (low_res_height, low_res_width), cv2.INTER_NEAREST)
-            img_motion = cv2.resize(img_motion, (low_res_height, low_res_width), cv2.INTER_NEAREST)
+            img_view_input = cv2.resize(img_view_truth, (low_res_height, low_res_width), cv2.INTER_AREA)
+            img_depth = cv2.resize(img_depth,  (low_res_height, low_res_width), cv2.INTER_AREA)
+            img_motion = cv2.resize(img_motion, (low_res_height, low_res_width), cv2.INTER_AREA)
+            img_view_truth = cv2.resize(img_view_truth, (height, width), cv2.INTER_AREA)
+
 
             target_image = transform(img_view_truth)
             img_view = transform(img_view_input)
@@ -169,3 +225,28 @@ class SupersamplingDataset(Dataset):
         return len(self.data_list)
 
 
+
+class StereoSupersamplingDataset(Dataset):
+    def __init__(self, 
+                 left_dataset: SupersamplingDataset,
+                 right_dataset: SupersamplingDataset
+                 ) -> None:
+        super().__init__()
+        self.left_dataset = left_dataset
+        self.right_dataset = right_dataset
+
+    def __getitem__(self, index):
+        left_views, left_depths, left_motion, left_truth = self.left_dataset[index]
+        right_views, right_depths, right_motion, right_truth = self.right_dataset[index]
+
+        assert len(left_views) == len(right_views)
+        n = len(left_views)
+
+        mixed_views = [torch.cat((left_views[i].unsqueeze(0), right_views[i].unsqueeze(0)), dim=0) for i in range(n)]
+        mixed_depths = [torch.cat((left_depths[i].unsqueeze(0), right_depths[i].unsqueeze(0)), dim=0) for i in range(n)]
+        mixed_motion = [torch.cat((left_motion[i].unsqueeze(0), right_motion[i].unsqueeze(0)), dim=0) for i in range(n)]
+        mixed_truth = [torch.cat((left_truth[i].unsqueeze(0), right_truth[i].unsqueeze(0)), dim=0) for i in range(n)]
+        return mixed_views, mixed_depths, mixed_motion, mixed_truth
+
+    def __len__(self) -> int:
+        return min(len(self.left_dataset), len(self.right_dataset))
