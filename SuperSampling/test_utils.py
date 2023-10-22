@@ -58,11 +58,11 @@ class StereoRecurrentTestingDataLoader(BaseDataLoader):
                  overlap_hr: int,
                  num_workers: int = 1,
                  output_dimensions: int | None = None,
-                 
+                 num_frames = 2,         
                  num_data: int | None = None
                  ):
         reverse: bool = True,
-        num_frames = 2
+        
         batch_size = 1
 
         left_data_dirs = [os.path.join(data_dir, left_dirname) for data_dir in data_dirs]
@@ -146,8 +146,8 @@ class ChunkedDataset(Dataset):
         views, depths, motions, truths = self.dataset[index]
         assert len(views) == 2
 
-        unchunked_view = views[1]
-        unchunked_truth = truths[1]
+        unchunked_view = views[-1]
+        unchunked_truth = truths[-1]
 
         views = map(add_batch_dim, views)
         depths = map(add_batch_dim, depths)
@@ -159,7 +159,7 @@ class ChunkedDataset(Dataset):
         depths = [split_image(depth, self.patch_size_lr, self.overlap_lr)[0] for depth in depths]
         motions = [split_image(motion, self.patch_size_lr, self.overlap_lr)[0] for motion in motions]
         truths = [split_image(truth, self.patch_size_hr, self.overlap_hr, True) for truth in truths]
-        indices = truths[1][1]     
+        indices = truths[-1][1]     
         truths = [truth for truth, _ in truths]
 
         # views = list(map(remove_batch_dim, views))

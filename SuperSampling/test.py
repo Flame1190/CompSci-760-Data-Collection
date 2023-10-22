@@ -333,6 +333,161 @@ def test_mnss(config):
     logger.info(log)
     print(f"runtime: {1000 * total_time / (n_samples - 1)} ms per frame")
 
+def test_nsrr(config):
+    
+    assert config["arch"]["type"] == "NSRR", "NSRR only punk"
+
+    toImage = torchvision.transforms.ToPILImage()
+    logger = config.get_logger('test')
+
+    scale_factor = config["globals"]["scale_factor"]
+    # patch_size_hr = config["globals"]["patch_size_hr"]
+    patch_size_hr = 264
+    # overlap_hr = config["globals"]["overlap_hr"]
+    overlap_hr = 12
+    patch_size_lr = patch_size_hr // scale_factor
+    overlap_lr = overlap_hr // scale_factor
+
+    output_dimensions = config["data_loader"]["args"]["output_dimensions"]
+    assert output_dimensions is not None, "Sorry mate, you need to specify output dimensions since I won't fix my code"
+
+    # ensure results directories exist
+    input_path = os.path.join("test_results", "input")
+    output_path = os.path.join("test_results", "output")
+    truth_path = os.path.join("test_results", "truth")
+
+    ensure_dir(input_path)
+    ensure_dir(output_path)
+    ensure_dir(truth_path)
+
+    # setup data_loader instances
+    data_loader = StereoRecurrentTestingDataLoader(
+        config['data_loader']['args']['data_dirs'],
+        left_dirname=config['data_loader']['args']['left_dirname'],
+        right_dirname=config['data_loader']['args']['right_dirname'],
+        color_dirname=config['data_loader']['args']['color_dirname'],
+        depth_dirname=config['data_loader']['args']['depth_dirname'],
+        motion_dirname=config['data_loader']['args']['motion_dirname'],
+
+        num_workers=4,
+
+        scale_factor=scale_factor,
+        patch_size_hr=patch_size_hr,
+        overlap_hr=overlap_hr,
+
+        output_dimensions=output_dimensions,
+        num_data=config["data_loader"]["args"]["num_data"],
+        num_frames=5
+    )
+
+    # build model architecture
+    model = config.init_obj('arch', module_arch, scale_factor=scale_factor)
+    logger.info(model)
+
+    # init model weights from checkpoint
+    logger.info('Loading checkpoint: {} ...'.format(config.resume))
+    checkpoint = torch.load(config.resume)
+    state_dict = checkpoint['state_dict']
+    if config['n_gpu'] > 1:
+        model = torch.nn.DataParallel(model)
+    model.load_state_dict(state_dict)
+
+    # prepare model for testing
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = model.to(device)
+    model.eval()
+
+    # test
+    compute_metrics = True
+    total_metrics = torch.zeros(2 + 2 + 1)
+    total_time = 0.0
+    data_time = 0.0
+
+    indices = None
+
+    perm_for_stereo = lambda res_list: [tensor.squeeze(0) for tensor in res_list]
+    with torch.no_grad(): 
+        assert torch.is_grad_enabled() == False, "No gradients should be computed"
+        t_start_load = time.time()
+
+        for frame_idx, [
+            low_res_list, 
+            depth_list, 
+            motion_vector_list, 
+            target_list, 
+            indices,
+            unchunked_low_res,
+            _
+        ] in enumerate(tqdm(data_loader)):
+            low_res_list = perm_for_stereo(low_res_list[::-1])
+            depth_list = perm_for_stereo(depth_list[::-1])
+            motion_vector_list = perm_for_stereo(motion_vector_list[::-1])
+            target_list = perm_for_stereo(target_list[::-1][:1])
+
+            data_time += time.time() - t_start_load
+
+            
+            left_depth_list = [depth[0].to(device) for depth in depth_list]
+            right_depth_list = [depth[1].to(device) for depth in depth_list]
+            left_motion_list = [motion_vector[0].to(device) for motion_vector in motion_vector_list]
+            right_motion_list = [motion_vector[1].to(device) for motion_vector in motion_vector_list]
+            left_low_res_list = [low_res[0].to(device) for low_res in low_res_list]
+            right_low_res_list = [low_res[1].to(device) for low_res in low_res_list]
+
+            start = time.time()
+            left_output = model(left_low_res_list, left_depth_list, left_motion_list)
+            right_output = model(right_low_res_list, right_depth_list, right_motion_list)
+            # first one takes much longer due to lazy init i assume
+            if frame_idx >= 1:
+                total_time += (time.time() - start)
+
+            # metrics
+            left_target, right_target = target_list[0]
+            if compute_metrics:
+                # computing loss, metrics on test set
+                left_output = left_output.cpu().detach()
+                right_output = right_output.cpu().detach()
+                
+                left_target = left_target.cpu().detach()
+                right_target = right_target.cpu().detach()
+
+                
+                total_metrics[0] += metrics.psnr(left_output, left_target) 
+                total_metrics[1] += metrics.psnr(right_output, right_target)
+
+                total_metrics[2] += metrics.ssim(left_output, left_target) 
+                total_metrics[3] += metrics.ssim(right_output, right_target)
+
+                total_metrics[4] += metrics.wsdr(
+                    left_output, 
+                    right_output, 
+                    left_target, 
+                    right_target, 
+                    F.upsample(left_depth_list[0], scale_factor=scale_factor).cpu(), 
+                    warping_coeff=0.1845
+                    )
+
+            # merge patches
+            merged_output = merge_image(left_output, indices, (1, 3, *output_dimensions), patch_size_hr, overlap_hr)
+            left_input = unchunked_low_res[0]
+
+            # save result images
+            toImage(left_input[0]).save(os.path.join(input_path, f"{frame_idx}.png"))
+            toImage(merged_output[0]).save(os.path.join(output_path, f"{frame_idx}.png"))
+
+            t_start_load = time.time()
+
+    n_samples = len(data_loader.sampler)
+    log = {
+        "left_psnr": total_metrics[0].item() / n_samples,
+        "right_psnr": total_metrics[1].item() / n_samples,
+        "left_ssim": total_metrics[2].item() / n_samples,
+        "right_ssim": total_metrics[3].item() / n_samples,
+        "wsdr": total_metrics[4].item() / n_samples,
+    }
+    logger.info(log)
+    print(f"runtime: {1000 * total_time / (n_samples - 1)} ms per frame")
+
 
 
 def test_inss(
@@ -415,67 +570,14 @@ def test_inss(
 
     return (total_loss, total_metrics, total_time)
 
-# def main(config):
-#     toImage = torchvision.transforms.ToPILImage()
 
-#     logger = config.get_logger('test')
-#     scale_factor = config["globals"]["scale_factor"]
-
-#     # setup data_loader instances
-#     data_loader = getattr(module_data, config['data_loader']['type'])(
-#         config['data_loader']['args']['data_dirs'],
-#         color_dirname="color/",
-#         depth_dirname="depth/",
-#         motion_dirname="motion/",
-#         batch_size=1 ,
-#         shuffle=False,
-#         num_workers=4,
-#         num_frames=config['data_loader']['args']['num_frames'],
-#         scale_factor=scale_factor,
-#         output_dimensions=config['data_loader']['args']['output_dimensions'],
-#         # num_data=config["data_loader"]["args"]["num_data"]
-#     )
-
-#     # build model architecture
-#     model = config.init_obj('arch', module_arch, scale_factor=scale_factor)
-#     logger.info(model)
-
-#     # get function handles of loss and metrics
-#     # loss_fn = getattr(module_loss, config['loss'])
-#     loss_fn = lambda a, b: 0
-#     metric_fns = [getattr(module_metric, met) for met in config['metrics']]
-
-#     logger.info('Loading checkpoint: {} ...'.format(config.resume))
-#     checkpoint = torch.load(config.resume)
-#     state_dict = checkpoint['state_dict']
-#     if config['n_gpu'] > 1:
-#         model = torch.nn.DataParallel(model)
-#     model.load_state_dict(state_dict)
-
-#     # prepare model for testing
-#     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-#     model = model.to(device)
-#     model.eval()
-
-#     total_loss = 0.0
-#     total_metrics = torch.zeros(len(metric_fns))
-#     total_time = 0.0
-
-#     with torch.no_grad():
-#         total_loss, total_metrics, total_time = test_inss(data_loader, model, loss_fn, metric_fns, device, config)
-
-#     n_samples = len(data_loader.sampler)
-#     log = {'loss': total_loss / n_samples}
-#     log.update({
-#         met.__name__: total_metrics[i].item() / n_samples for i, met in enumerate(metric_fns)
-#     })
-#     logger.info(log)
-    # print(f"runtime: {1000 * total_time / n_samples} ms per frame")
 
 def main(config):
     if config["run"] == "sinss":
         test_sinss(config)
     elif config["run"] == "mnss":
+        test_mnss(config)
+    elif config["run"] == "nsrr":
         test_mnss(config)
     else:
         raise NotImplementedError("Only sinss is supported")
