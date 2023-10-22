@@ -144,7 +144,7 @@ class ChunkedDataset(Dataset):
         remove_batch_dim = lambda x: x[0]
 
         views, depths, motions, truths = self.dataset[index]
-        assert len(views) == 2
+        # assert len(views) == 2
 
         unchunked_view = views[-1]
         unchunked_truth = truths[-1]

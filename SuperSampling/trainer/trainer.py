@@ -142,13 +142,15 @@ class Trainer(BaseTrainer):
         # patch_size_HR = 528
         new_size_lr = new_size_hr // self.scale_factor
         
-        idx_h = np.random.randint(0, cur_size_hr - new_size_hr)
-        idx_w = np.random.randint(0, cur_size_hr - new_size_hr)
+        # idx_h = np.random.randint(0, cur_size_hr - new_size_hr)
+        # idx_w = np.random.randint(0, cur_size_hr - new_size_hr)
+        idx_h = 0
+        idx_w = 0
         get_target_patch_high_res = lambda x : x[:, :, idx_h:idx_h+new_size_hr, idx_w:idx_w+new_size_hr]
         
-        idx_h = idx_h // self.scale_factor
-        idx_w = idx_w // self.scale_factor
-        get_target_patch_low_res = lambda x : x[:, :, idx_h:idx_h+new_size_lr, idx_w:idx_w+new_size_lr]
+        idx_h_lr = idx_h // self.scale_factor
+        idx_w_lr = idx_w // self.scale_factor
+        get_target_patch_low_res = lambda x : x[:, :, idx_h_lr:idx_h_lr+new_size_lr, idx_w_lr:idx_w_lr+new_size_lr]
         return get_target_patch_high_res, get_target_patch_low_res
 
     def init_nsrr(self):

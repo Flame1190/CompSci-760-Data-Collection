@@ -1,5 +1,5 @@
 {
-    "name": "SINSS_TEST",
+    "name": "SINSS_2X_TEST",
     "run": "sinss",
     "n_gpu": 2,
     "globals": {

@@ -1,5 +1,5 @@
 {
-    "name": "SINSS_TEST",
+    "name": "SINSS_3X_TEST",
     "run": "sinss",
     "n_gpu": 2,
     "globals": {
@@ -20,7 +20,7 @@
             
 	        "output_dimensions": [1200, 1200],
             "num_frames": 2,
-            "num_data": 250
+            "num_data": null
         }
     }
 }

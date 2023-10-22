@@ -1,4 +1,5 @@
 {
+    "name": "NSRR_3X_TEST",
     "run": "nsrr",
     "n_gpu": 2,
     "globals": {
@@ -18,8 +19,7 @@
             "motion_dirname": "motion/",
             
 	        "output_dimensions": [1200, 1200],
-            "num_frames": 2,
-            "num_data": 80
+            "num_data": null
         }
     }
 }
