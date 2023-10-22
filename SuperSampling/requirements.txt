@@ -5,3 +5,5 @@ tqdm
 tensorboard>=1.14
 kornia
 opencv-python 
+Pillow
+pandas
